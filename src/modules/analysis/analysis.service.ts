@@ -115,6 +115,7 @@ export class AnalysisService {
         writing,
         writingType,
       );
+
       const estimatedTokens = TokenEstimator.estimateTotalTokens(prompt, 500);
 
       this.logger.debug(
@@ -145,14 +146,7 @@ export class AnalysisService {
       this.logger.debug(`Calling OpenAI API for writing ${writing.id}`);
       const aiResponse = await this.openAiProvider.generateAnalysis({
         prompt,
-        temperature: 0.4,
-        maxTokens: 1500,
       });
-
-      console.log(
-        '🚀 ~ AnalysisService ~ createWithAiAnalysis ~ aiResponse:',
-        aiResponse,
-      );
 
       // Step 5: Parse and validate response
       const parseResult = this.responseParserService.parseAndValidate(
@@ -166,16 +160,8 @@ export class AnalysisService {
       }
 
       const jsonText = extractJson(parseResult.rawContent);
-      console.log(
-        '🚀 ~ AnalysisService ~ createWithAiAnalysis ~ jsonText:',
-        jsonText,
-      );
 
       const parsed = JSON.parse(jsonText);
-      console.log(
-        '🚀 ~ AnalysisService ~ createWithAiAnalysis ~ parsed:',
-        parsed,
-      );
 
       // Step 6: Create analysis record with AI feedback
       const analysis = new Analysis();
@@ -183,7 +169,7 @@ export class AnalysisService {
       analysis.writingId = dto.writingId;
       analysis.feedbackJson = {
         ...dto.feedbackJson,
-        aiAnalysis: parseResult.rawContent || null,
+        aiAnalysis: parsed || null,
         validationErrors: parseResult.errors,
         generatedAt: new Date().toISOString(),
         writingType,

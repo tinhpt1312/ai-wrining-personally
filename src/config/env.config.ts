@@ -20,23 +20,23 @@ export const ENV = {
 
   JWT: {
     SECRET: process.env.JWT_SECRET,
-    EXPIRES: process.env.JWT_EXPIRATION_TIME || '3600',
-    COOKIE_NAME: process.env.JWT_COOKIE_NAME || 'token',
+    EXPIRES: process.env.JWT_EXPIRATION_TIME,
+    COOKIE_NAME: process.env.JWT_COOKIE_NAME,
   },
 
-  GEMINI: {
-    API_KEY: process.env.GEMINI_API_KEY || '',
-    MODEL: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
-    TEMPERATURE: Number(process.env.GEMINI_TEMPERATURE) || 0.4,
-    MAX_TOKENS: Number(process.env.GEMINI_MAX_TOKENS) || 1300,
-    DAILY_TOKEN_LIMIT: Number(process.env.DAILY_TOKEN_LIMIT) || 50000,
-    TOKEN_BUFFER_PERCENT: Number(process.env.TOKEN_BUFFER_PERCENT) || 0.1,
+  ONEROUTER: {
+    API_KEY: process.env.ONEROUTER_API_KEY,
+    MODEL: process.env.ONEROUTER_MODEL,
+    TEMPERATURE: Number(process.env.ONEROUTER_TEMPERATURE),
+    MAX_TOKENS: Number(process.env.ONEROUTER_MAX_TOKENS),
+    DAILY_TOKEN_LIMIT: Number(process.env.DAILY_TOKEN_LIMIT),
+    TOKEN_BUFFER_PERCENT: Number(process.env.TOKEN_BUFFER_PERCENT),
   },
 
   OPENAI: {
-    API_KEY: process.env.GEMINI_API_KEY || '',
-    MODEL: process.env.GEMINI_MODEL || 'gpt-3.5-turbo',
-    TEMPERATURE: Number(process.env.GEMINI_TEMPERATURE) || 0.4,
-    MAX_TOKENS: Number(process.env.GEMINI_MAX_TOKENS) || 1300,
+    API_KEY: process.env.ONEROUTER_API_KEY,
+    MODEL: process.env.ONEROUTER_MODEL,
+    TEMPERATURE: Number(process.env.ONEROUTER_TEMPERATURE),
+    MAX_TOKENS: Number(process.env.ONEROUTER_MAX_TOKENS),
   },
 };

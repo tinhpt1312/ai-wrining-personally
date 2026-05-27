@@ -8,8 +8,8 @@ import { TokenUsageInfo } from '../../ai/types/ai.types';
 @Injectable()
 export class TokenTrackerService {
   private readonly logger = new Logger(TokenTrackerService.name);
-  private readonly dailyLimit = ENV.GEMINI.DAILY_TOKEN_LIMIT;
-  private readonly bufferPercent = ENV.GEMINI.TOKEN_BUFFER_PERCENT;
+  private readonly dailyLimit = ENV.ONEROUTER.DAILY_TOKEN_LIMIT;
+  private readonly bufferPercent = ENV.ONEROUTER.TOKEN_BUFFER_PERCENT;
 
   constructor(
     @InjectRepository(UserTokenUsage)

@@ -23,8 +23,8 @@ export class OpenAiProvider {
 
   constructor() {
     this.genAi = new OpenAI({
-      apiKey: ENV.OPENAI.API_KEY,
-      baseURL: 'https://openrouter.ai/api/v1/chat/completions', // Use OpenRouter endpoint
+      apiKey: ENV.ONEROUTER.API_KEY,
+      baseURL: 'https://openrouter.ai/api/v1', // Use OpenRouter endpoint
     });
   }
 
@@ -33,19 +33,18 @@ export class OpenAiProvider {
   ): Promise<AiProviderResponse> {
     try {
       const response = await this.genAi.chat.completions.create({
-        model: ENV.OPENAI.MODEL,
+        model: ENV.ONEROUTER.MODEL || '',
         messages: [
           {
             role: 'user',
             content: request.prompt,
           },
         ],
-        temperature: request.temperature ?? 0.4,
-        max_tokens: request.maxTokens ?? 1500,
+        temperature: request.temperature ?? ENV.ONEROUTER.TEMPERATURE,
+        max_tokens: request.maxTokens ?? 1200,
       });
 
       const text = response.choices?.[0]?.message?.content;
-      console.log('🚀 ~ OpenAiProvider ~ generateAnalysis ~ text:', text);
 
       if (!text) {
         throw new AiError(
@@ -54,7 +53,7 @@ export class OpenAiProvider {
         );
       }
 
-      // OpenRouter/OpenAI API usage metadata
+      // OpenRouter/ONEROUTER API usage metadata
       const inputTokens = response.usage?.prompt_tokens ?? 0;
       const outputTokens = response.usage?.completion_tokens ?? 0;
 
@@ -104,7 +103,7 @@ export class OpenAiProvider {
   async checkConnectivity(): Promise<boolean> {
     try {
       await this.genAi.chat.completions.create({
-        model: ENV.OPENAI.MODEL,
+        model: ENV.ONEROUTER.MODEL || '',
         messages: [
           {
             role: 'user',
@@ -112,7 +111,7 @@ export class OpenAiProvider {
           },
         ],
         temperature: 0.1,
-        max_tokens: 10,
+        max_tokens: 1200,
       });
       return true;
     } catch (error) {
