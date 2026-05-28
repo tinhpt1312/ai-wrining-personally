@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsUUID, IsOptional, IsObject } from 'class-validator';
 
-export class CreateAnalysisDTO {
+export class CreateAnalyticsDTO {
   @ApiProperty({
     description: 'ID of the writing to analyze',
     example: '550e8400-e29b-41d4-a716-446655440000',

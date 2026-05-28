@@ -4,726 +4,746 @@
  */
 
 export interface paths {
-    "/api/auth/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["AuthController_register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/api/auth/register': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["AuthController_login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations['AuthController_register'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/writings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["WritingsController_findAll"];
-        put?: never;
-        post: operations["WritingsController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations['AuthController_login'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/writings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/writings/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["WritingsController_findOne"];
-        put?: never;
-        post?: never;
-        delete: operations["WritingsController_remove"];
-        options?: never;
-        head?: never;
-        patch: operations["WritingsController_update"];
-        trace?: never;
+    get: operations['WritingsController_findAll'];
+    put?: never;
+    post: operations['WritingsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/writings/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/writings/stats/overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["WritingsController_getStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations['WritingsController_findOne'];
+    put?: never;
+    post?: never;
+    delete: operations['WritingsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['WritingsController_update'];
+    trace?: never;
+  };
+  '/api/writings/stats/overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/analysis": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AnalysisController_findAll"];
-        put?: never;
-        post: operations["AnalysisController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations['WritingsController_getStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/analysis': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/analysis/ai": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["AnalysisController_createWithAiAnalysis"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations['AnalyticsController_findAll'];
+    put?: never;
+    post: operations['AnalyticsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/analysis/ai': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/analysis/tokens/usage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AnalysisController_getTokenUsage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post: operations['AnalyticsController_createWithAiAnalytics'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/analysis/tokens/usage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/analysis/tokens/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AnalysisController_getTokenStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations['AnalyticsController_getTokenUsage'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/analysis/tokens/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/analysis/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AnalysisController_findOne"];
-        put?: never;
-        post?: never;
-        delete: operations["AnalysisController_remove"];
-        options?: never;
-        head?: never;
-        patch: operations["AnalysisController_update"];
-        trace?: never;
+    get: operations['AnalyticsController_getTokenStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/analysis/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/analysis/writing/{writingId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AnalysisController_findByWritingId"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations['AnalyticsController_findOne'];
+    put?: never;
+    post?: never;
+    delete: operations['AnalyticsController_remove'];
+    options?: never;
+    head?: never;
+    patch: operations['AnalyticsController_update'];
+    trace?: never;
+  };
+  '/api/analysis/writing/{writingId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/analysis/stats/overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AnalysisController_getStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations['AnalyticsController_findByWritingId'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/analysis/stats/overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/users/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["UsersController_getMe"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get: operations['AnalyticsController_getStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/users/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get: operations['UsersController_getMe'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        RegisterDTO: {
-            /** @example john_doe */
-            username: string;
-            email: string;
-            password: string;
-        };
-        LoginDTO: {
-            /** @example john_doe */
-            username: string;
-            password: string;
-        };
-        CreateWritingDTO: {
-            /**
-             * @description Title of the writing
-             * @example My First Journal Entry
-             */
-            title: string;
-            /**
-             * @description Content of the writing
-             * @example Today was a great day...
-             */
-            content: string;
-            /**
-             * @description Type of writing
-             * @example journal
-             * @enum {string}
-             */
-            type: "journal" | "social_essay" | "blog_post" | "short_story" | "article";
-            /**
-             * @description Status of the writing
-             * @default draft
-             * @example draft
-             * @enum {string}
-             */
-            status: "draft" | "in_progress" | "completed" | "archived";
-        };
-        UpdateWritingDTO: {
-            /**
-             * @description Title of the writing
-             * @example Updated Journal Entry
-             */
-            title?: string;
-            /**
-             * @description Content of the writing
-             * @example Updated content...
-             */
-            content?: string;
-            /**
-             * @description Type of writing
-             * @example journal
-             * @enum {string}
-             */
-            type?: "journal" | "social_essay" | "blog_post" | "short_story" | "article";
-            /**
-             * @description Status of the writing
-             * @example completed
-             * @enum {string}
-             */
-            status?: "draft" | "in_progress" | "completed" | "archived";
-        };
-        CreateAnalysisDTO: {
-            /**
-             * @description ID of the writing to analyze
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            writingId: string;
-            /**
-             * @description AI-generated feedback and analysis data (JSON structure varies by use case)
-             * @example {
-             *       "tone": "formal",
-             *       "confidence": 0.95,
-             *       "suggestions": [
-             *         "Consider a more conversational tone",
-             *         "Add more emotion"
-             *       ]
-             *     }
-             */
-            feedbackJson?: Record<string, never>;
-        };
-        CreateAiAnalysisDTO: {
-            /**
-             * @description ID of the writing to analyze
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            writingId: string;
-            /**
-             * @description Whether to trigger AI analysis (default: true)
-             * @example true
-             */
-            triggerAi?: boolean;
-            /**
-             * @description Type of writing (determines analysis focus and prompt strategy)
-             * @example journal
-             * @enum {string}
-             */
-            writingType?: "journal" | "social_essay" | "blog_post" | "short_story" | "article";
-            /**
-             * @description Optional initial feedback (can be combined with AI analysis)
-             * @example {
-             *       "userNotes": "Focus on clarity"
-             *     }
-             */
-            feedbackJson?: Record<string, never>;
-        };
-        UpdateAnalysisDTO: {
-            /**
-             * @description AI-generated feedback and analysis data (JSON structure varies by use case)
-             * @example {
-             *       "tone": "formal",
-             *       "confidence": 0.95,
-             *       "suggestions": [
-             *         "Consider a more conversational tone",
-             *         "Add more emotion"
-             *       ]
-             *     }
-             */
-            feedbackJson?: Record<string, never>;
-        };
+  schemas: {
+    RegisterDTO: {
+      /** @example john_doe */
+      username: string;
+      email: string;
+      password: string;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    LoginDTO: {
+      /** @example john_doe */
+      username: string;
+      password: string;
+    };
+    CreateWritingDTO: {
+      /**
+       * @description Title of the writing
+       * @example My First Journal Entry
+       */
+      title: string;
+      /**
+       * @description Content of the writing
+       * @example Today was a great day...
+       */
+      content: string;
+      /**
+       * @description Type of writing
+       * @example journal
+       * @enum {string}
+       */
+      type:
+        | 'journal'
+        | 'social_essay'
+        | 'blog_post'
+        | 'short_story'
+        | 'article';
+      /**
+       * @description Status of the writing
+       * @default draft
+       * @example draft
+       * @enum {string}
+       */
+      status: 'draft' | 'in_progress' | 'completed' | 'archived';
+    };
+    UpdateWritingDTO: {
+      /**
+       * @description Title of the writing
+       * @example Updated Journal Entry
+       */
+      title?: string;
+      /**
+       * @description Content of the writing
+       * @example Updated content...
+       */
+      content?: string;
+      /**
+       * @description Type of writing
+       * @example journal
+       * @enum {string}
+       */
+      type?:
+        | 'journal'
+        | 'social_essay'
+        | 'blog_post'
+        | 'short_story'
+        | 'article';
+      /**
+       * @description Status of the writing
+       * @example completed
+       * @enum {string}
+       */
+      status?: 'draft' | 'in_progress' | 'completed' | 'archived';
+    };
+    CreateAnalyticsDTO: {
+      /**
+       * @description ID of the writing to analyze
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      writingId: string;
+      /**
+       * @description AI-generated feedback and analysis data (JSON structure varies by use case)
+       * @example {
+       *       "tone": "formal",
+       *       "confidence": 0.95,
+       *       "suggestions": [
+       *         "Consider a more conversational tone",
+       *         "Add more emotion"
+       *       ]
+       *     }
+       */
+      feedbackJson?: Record<string, never>;
+    };
+    CreateAiAnalyticsDTO: {
+      /**
+       * @description ID of the writing to analyze
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      writingId: string;
+      /**
+       * @description Whether to trigger AI analysis (default: true)
+       * @example true
+       */
+      triggerAi?: boolean;
+      /**
+       * @description Type of writing (determines analysis focus and prompt strategy)
+       * @example journal
+       * @enum {string}
+       */
+      writingType?:
+        | 'journal'
+        | 'social_essay'
+        | 'blog_post'
+        | 'short_story'
+        | 'article';
+      /**
+       * @description Optional initial feedback (can be combined with AI analysis)
+       * @example {
+       *       "userNotes": "Focus on clarity"
+       *     }
+       */
+      feedbackJson?: Record<string, never>;
+    };
+    UpdateAnalyticsDTO: {
+      /**
+       * @description AI-generated feedback and analysis data (JSON structure varies by use case)
+       * @example {
+       *       "tone": "formal",
+       *       "confidence": 0.95,
+       *       "suggestions": [
+       *         "Consider a more conversational tone",
+       *         "Add more emotion"
+       *       ]
+       *     }
+       */
+      feedbackJson?: Record<string, never>;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AuthController_register: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterDTO"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  AuthController_register: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    AuthController_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginDTO"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RegisterDTO'];
+      };
     };
-    WritingsController_findAll: {
-        parameters: {
-            query?: {
-                /** @description Pagination limit (number of items per page) */
-                limit?: number;
-                /** @description Pagination offset (number of items to skip) */
-                offset?: number;
-                /** @description Filter by writing type */
-                type?: "journal" | "social_essay" | "blog_post" | "short_story" | "article";
-                /** @description Filter by writing status */
-                status?: "draft" | "in_progress" | "completed" | "archived";
-                /** @description Search by title (partial match) */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+        content?: never;
+      };
     };
-    WritingsController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateWritingDTO"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  AuthController_login: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    WritingsController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginDTO'];
+      };
     };
-    WritingsController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+        content?: never;
+      };
     };
-    WritingsController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateWritingDTO"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  WritingsController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Pagination limit (number of items per page) */
+        limit?: number;
+        /** @description Pagination offset (number of items to skip) */
+        offset?: number;
+        /** @description Filter by writing type */
+        type?:
+          | 'journal'
+          | 'social_essay'
+          | 'blog_post'
+          | 'short_story'
+          | 'article';
+        /** @description Filter by writing status */
+        status?: 'draft' | 'in_progress' | 'completed' | 'archived';
+        /** @description Search by title (partial match) */
+        search?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    WritingsController_getStats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+        content?: never;
+      };
     };
-    AnalysisController_findAll: {
-        parameters: {
-            query?: {
-                /** @description Pagination limit (number of items per page) */
-                limit?: number;
-                /** @description Pagination offset (number of items to skip) */
-                offset?: number;
-                /** @description Filter by writing ID */
-                writingId?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  WritingsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    AnalysisController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAnalysisDTO"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateWritingDTO'];
+      };
     };
-    AnalysisController_createWithAiAnalysis: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAiAnalysisDTO"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+        content?: never;
+      };
     };
-    AnalysisController_getTokenUsage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  WritingsController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    AnalysisController_getTokenStats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+        content?: never;
+      };
     };
-    AnalysisController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  WritingsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    AnalysisController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+        content?: never;
+      };
     };
-    AnalysisController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateAnalysisDTO"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  WritingsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    AnalysisController_findByWritingId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                writingId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateWritingDTO'];
+      };
     };
-    AnalysisController_getStats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+        content?: never;
+      };
     };
-    UsersController_getMe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  WritingsController_getStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Pagination limit (number of items per page) */
+        limit?: number;
+        /** @description Pagination offset (number of items to skip) */
+        offset?: number;
+        /** @description Filter by writing ID */
+        writingId?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateAnalyticsDTO'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_createWithAiAnalytics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateAiAnalyticsDTO'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_getTokenUsage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_getTokenStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateAnalyticsDTO'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_findByWritingId: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        writingId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AnalyticsController_getStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UsersController_getMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }

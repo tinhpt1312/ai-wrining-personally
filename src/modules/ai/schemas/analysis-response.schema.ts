@@ -12,7 +12,7 @@ export const FeedbackItemSchema = z.object({
 
 export type FeedbackItem = z.infer<typeof FeedbackItemSchema>;
 
-export const WritingAnalysisSchema = z.object({
+export const WritingAnalyticsSchema = z.object({
   structure: FeedbackItemSchema,
   clarity: FeedbackItemSchema,
   tone: FeedbackItemSchema,
@@ -23,15 +23,15 @@ export const WritingAnalysisSchema = z.object({
   actionItems: z.array(z.string().min(5).max(150)).min(2).max(5),
 });
 
-export type WritingAnalysis = z.infer<typeof WritingAnalysisSchema>;
+export type WritingAnalytics = z.infer<typeof WritingAnalyticsSchema>;
 
 /**
  * Partial schema for fallback/incomplete responses
  */
-export const PartialWritingAnalysisSchema = WritingAnalysisSchema.partial();
+export const PartialWritingAnalyticsSchema = WritingAnalyticsSchema.partial();
 
-export type PartialWritingAnalysis = z.infer<
-  typeof PartialWritingAnalysisSchema
+export type PartialWritingAnalytics = z.infer<
+  typeof PartialWritingAnalyticsSchema
 >;
 
 /**
@@ -39,7 +39,7 @@ export type PartialWritingAnalysis = z.infer<
  */
 export const ResponseParserResultSchema = z.object({
   valid: z.boolean(),
-  data: WritingAnalysisSchema.optional(),
+  data: WritingAnalyticsSchema.optional(),
   errors: z.array(z.string()).optional(),
   rawContent: z.string(),
 });

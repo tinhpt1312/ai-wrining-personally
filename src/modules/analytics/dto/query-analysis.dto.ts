@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsNumber, Min, Max, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class QueryAnalysisDTO {
+export class QueryAnalyticsDTO {
   @ApiProperty({
     description: 'Pagination limit (number of items per page)',
     example: 10,

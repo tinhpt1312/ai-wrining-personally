@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './users.entity';
-import { Analysis } from './analysis.entity';
+import { Analytics } from './analysis.entity';
 
 @Entity({ name: 'writings', schema: 'public' })
 export class Writing {
@@ -74,9 +74,9 @@ export class Writing {
   })
   user!: User;
 
-  @OneToMany(() => Analysis, (analysis) => analysis.writing, {
+  @OneToMany(() => Analytics, (analysis) => analysis.writing, {
     cascade: ['remove'],
     onDelete: 'CASCADE',
   })
-  analyses!: Analysis[];
+  analyses!: Analytics[];
 }

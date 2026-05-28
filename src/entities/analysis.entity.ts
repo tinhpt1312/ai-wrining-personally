@@ -11,7 +11,7 @@ import { User } from './users.entity';
 import { Writing } from './writings.entity';
 
 @Entity({ name: 'analysis', schema: 'public' })
-export class Analysis {
+export class Analytics {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 

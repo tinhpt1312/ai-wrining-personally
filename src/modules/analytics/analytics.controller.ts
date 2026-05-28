@@ -13,23 +13,23 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import type { RequestWithUser } from 'src/types';
-import { AnalysisService } from './analysis.service';
+import { AnalyticsService } from './analytics.service';
 import {
-  CreateAnalysisDTO,
-  QueryAnalysisDTO,
-  UpdateAnalysisDTO,
-  CreateAiAnalysisDTO,
+  CreateAnalyticsDTO,
+  QueryAnalyticsDTO,
+  UpdateAnalyticsDTO,
+  CreateAiAnalyticsDTO,
 } from './dto';
 import { TokenLimitGuard } from './guards/token-limit.guard';
 import { TokenTrackerService } from './services/token-tracker.service';
 
-@ApiTags('analysis')
+@ApiTags('analytics')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('analysis')
-export class AnalysisController {
+@Controller('analytics')
+export class AnalyticsController {
   constructor(
-    private readonly analysisService: AnalysisService,
+    private readonly analyticsService: AnalyticsService,
     private readonly tokenTrackerService: TokenTrackerService,
   ) {}
 
@@ -37,9 +37,9 @@ export class AnalysisController {
    * Create a new analysis for a writing
    */
   @Post()
-  async create(@Body() dto: CreateAnalysisDTO, @Req() req: RequestWithUser) {
+  async create(@Body() dto: CreateAnalyticsDTO, @Req() req: RequestWithUser) {
     const userId = req.user?.userId;
-    return this.analysisService.create(userId, dto);
+    return this.analyticsService.create(userId, dto);
   }
 
   /**
@@ -48,12 +48,12 @@ export class AnalysisController {
    */
   @UseGuards(TokenLimitGuard)
   @Post('ai')
-  async createWithAiAnalysis(
-    @Body() dto: CreateAiAnalysisDTO,
+  async createWithAiAnalytics(
+    @Body() dto: CreateAiAnalyticsDTO,
     @Req() req: RequestWithUser,
   ) {
     const userId = req.user?.userId;
-    return this.analysisService.createWithAiAnalysis(userId, dto);
+    return this.analyticsService.createWithAiAnalytics(userId, dto);
   }
 
   /**
@@ -78,9 +78,12 @@ export class AnalysisController {
    * Get all analyses for the current user
    */
   @Get()
-  async findAll(@Query() query: QueryAnalysisDTO, @Req() req: RequestWithUser) {
+  async findAll(
+    @Query() query: QueryAnalyticsDTO,
+    @Req() req: RequestWithUser,
+  ) {
     const userId = req.user?.userId;
-    return this.analysisService.findAll(userId, query);
+    return this.analyticsService.findAll(userId, query);
   }
 
   /**
@@ -89,7 +92,7 @@ export class AnalysisController {
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
     const userId = req.user?.userId;
-    return this.analysisService.findOne(id, userId);
+    return this.analyticsService.findOne(id, userId);
   }
 
   /**
@@ -101,7 +104,7 @@ export class AnalysisController {
     @Req() req: RequestWithUser,
   ) {
     const userId = req.user?.userId;
-    return this.analysisService.findByWritingId(writingId, userId);
+    return this.analyticsService.findByWritingId(writingId, userId);
   }
 
   /**
@@ -110,11 +113,11 @@ export class AnalysisController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() dto: UpdateAnalysisDTO,
+    @Body() dto: UpdateAnalyticsDTO,
     @Req() req: RequestWithUser,
   ) {
     const userId = req.user?.userId;
-    return this.analysisService.update(id, userId, dto);
+    return this.analyticsService.update(id, userId, dto);
   }
 
   /**
@@ -126,7 +129,7 @@ export class AnalysisController {
     @Req() req: RequestWithUser,
   ): Promise<{ message: string }> {
     const userId = req.user?.userId;
-    return this.analysisService.remove(id, userId);
+    return this.analyticsService.remove(id, userId);
   }
 
   /**
@@ -135,6 +138,52 @@ export class AnalysisController {
   @Get('stats/overview')
   async getStats(@Req() req: RequestWithUser) {
     const userId = req.user?.userId;
-    return this.analysisService.getStats(userId);
+    return this.analyticsService.getStats(userId);
+  }
+
+  /**
+   * Get comprehensive analytics
+   */
+  @Get('dashboard')
+  async getDashboardAnalytics(@Req() req: RequestWithUser) {
+    const analytics = await this.analyticsService.getUserAnalytics(
+      req.user?.userId,
+    );
+    return { data: analytics };
+  }
+
+  /**
+   * Get daily stats
+   */
+  @Get('daily')
+  async getDailyStats(@Req() req: RequestWithUser) {
+    const stats = await this.analyticsService.getDailyStats(req.user?.userId);
+    return { data: stats };
+  }
+
+  /**
+   * Get writings by type
+   */
+  @Get('by-type')
+  async getWritingsByType(@Req() req: RequestWithUser) {
+    const data = await this.analyticsService.getWritingsByType(
+      req.user?.userId,
+    );
+    return { data };
+  }
+
+  /**
+   * Get progress comparison
+   */
+  @Get('progress-comparison')
+  async getProgressComparison(
+    @Req() req: RequestWithUser,
+    @Query('days') days: string = '30',
+  ) {
+    const data = await this.analyticsService.getProgressComparison(
+      req.user?.userId,
+      parseInt(days),
+    );
+    return { data };
   }
 }

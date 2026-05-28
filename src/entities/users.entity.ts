@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Writing } from './writings.entity';
-import { Analysis } from './analysis.entity';
+import { Analytics } from './analysis.entity';
 import { UserTokenUsage } from './user-token-usage.entity';
 
 @Entity({ name: 'users', schema: 'public' })
@@ -72,8 +72,8 @@ export class User {
   @OneToMany(() => Writing, (writing) => writing.user)
   writings!: Writing[];
 
-  @OneToMany(() => Analysis, (analysis) => analysis.user)
-  analyses!: Analysis[];
+  @OneToMany(() => Analytics, (analysis) => analysis.user)
+  analyses!: Analytics[];
 
   @OneToMany(() => UserTokenUsage, (tokenUsage) => tokenUsage.user)
   tokenUsages!: UserTokenUsage[];

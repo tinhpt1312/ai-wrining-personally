@@ -10,9 +10,9 @@ import { WritingType } from 'src/modules/ai/types/ai.types';
 
 /**
  * DTO for creating an analysis with AI generation
- * Extends base CreateAnalysisDTO with AI-specific parameters
+ * Extends base CreateAnalyticsDTO with AI-specific parameters
  */
-export class CreateAiAnalysisDTO {
+export class CreateAiAnalyticsDTO {
   @ApiProperty({
     description: 'ID of the writing to analyze',
     example: '550e8400-e29b-41d4-a716-446655440000',

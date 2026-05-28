@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { z } from 'zod';
 import {
-  PartialWritingAnalysisSchema,
+  PartialWritingAnalyticsSchema,
   ResponseParserResult,
-  WritingAnalysis,
-  WritingAnalysisSchema,
+  WritingAnalytics,
+  WritingAnalyticsSchema,
 } from '../../ai/schemas/analysis-response.schema';
 
 @Injectable()
@@ -43,7 +43,7 @@ export class ResponseParserService {
       }
 
       // Step 3: Validate against schema
-      const validationResult = WritingAnalysisSchema.safeParse(parsedData);
+      const validationResult = WritingAnalyticsSchema.safeParse(parsedData);
 
       if (validationResult.success) {
         this.logger.debug('Response validation successful');
@@ -55,13 +55,13 @@ export class ResponseParserService {
       }
 
       // Step 4: Try partial validation as fallback
-      const partialResult = PartialWritingAnalysisSchema.safeParse(parsedData);
+      const partialResult = PartialWritingAnalyticsSchema.safeParse(parsedData);
 
       if (partialResult.success && this.hasMinimalData(partialResult.data)) {
         this.logger.warn('Partial response validation successful (fallback)');
         return {
           valid: true,
-          data: this.fillPartialData(partialResult.data) as WritingAnalysis,
+          data: this.fillPartialData(partialResult.data) as WritingAnalytics,
           errors: this.formatZodErrors(validationResult.error),
           rawContent: content,
         };
@@ -171,10 +171,10 @@ export class ResponseParserService {
   /**
    * Fill partial data with defaults
    */
-  private fillPartialData(partial: any): Partial<WritingAnalysis> {
+  private fillPartialData(partial: any): Partial<WritingAnalytics> {
     const defaultFeedback = {
       score: 5,
-      feedback: 'Analysis in progress',
+      feedback: 'Analytics in progress',
       suggestions: ['Please review the feedback provided'],
     };
 
@@ -218,7 +218,7 @@ export class ResponseParserService {
    * Validate data structure without full parsing
    */
   validateStructure(data: any): boolean {
-    const result = WritingAnalysisSchema.safeParse(data);
+    const result = WritingAnalyticsSchema.safeParse(data);
     return result.success;
   }
 
@@ -226,6 +226,6 @@ export class ResponseParserService {
    * Get schema for documentation
    */
   getSchema() {
-    return WritingAnalysisSchema;
+    return WritingAnalyticsSchema;
   }
 }

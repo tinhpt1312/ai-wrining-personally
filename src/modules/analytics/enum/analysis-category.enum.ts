@@ -1,4 +1,4 @@
-export enum AnalysisCategoryEnum {
+export enum AnalyticsCategoryEnum {
   TONE_ANALYSIS = 'tone_analysis',
   GRAMMAR_CHECK = 'grammar_check',
   CLARITY_ASSESSMENT = 'clarity_assessment',

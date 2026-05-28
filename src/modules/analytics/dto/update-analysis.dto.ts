@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsObject } from 'class-validator';
 
-export class UpdateAnalysisDTO {
+export class UpdateAnalyticsDTO {
   @ApiProperty({
     description:
       'AI-generated feedback and analysis data (JSON structure varies by use case)',

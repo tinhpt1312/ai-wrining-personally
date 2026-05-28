@@ -21,7 +21,7 @@ export interface TokenUsageInfo {
   resetAt: string;
 }
 
-export interface AiAnalysisResult {
+export interface AiAnalyticsResult {
   success: boolean;
   data?: Record<string, any>;
   tokensUsed?: number;
