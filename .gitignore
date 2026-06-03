@@ -41,6 +41,34 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+.env.*.local
+.env.prod
+.env.production
+
+# Docker Secrets (RẤT QUAN TRỌNG - KHÔNG COMMIT!)
+/secrets/
+/secrets/**/*.txt
+/secrets/**/*.key
+/secrets/**/*.pem
+
+# SSL/TLS Certificates (nếu có)
+*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Backup files
+*.backup
+*.bak
+*.sql
+*.sql.gz
+
+# IDE temporary files
+.vscode/temp
+*.swp
+*.swo
+*~
 
 # temp directory
 .temp

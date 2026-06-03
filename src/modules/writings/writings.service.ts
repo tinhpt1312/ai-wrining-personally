@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Writing } from 'src/entities';
+import { Writing, Analytics, WritingSuggestion } from 'src/entities';
 import { CreateWritingDTO, UpdateWritingDTO, QueryWritingDTO } from './dto';
 import { WritingStatusEnum } from './enum';
 
@@ -15,6 +15,10 @@ export class WritingsService {
   constructor(
     @InjectRepository(Writing)
     private readonly writingRepository: Repository<Writing>,
+    @InjectRepository(Analytics)
+    private readonly analyticsRepository: Repository<Analytics>,
+    @InjectRepository(WritingSuggestion)
+    private readonly writingSuggestionRepository: Repository<WritingSuggestion>,
   ) {}
 
   /**
@@ -162,7 +166,13 @@ export class WritingsService {
       );
     }
 
-    // Use delete() instead of remove() to leverage database-level CASCADE DELETE
+    // Delete all related analyses first
+    await this.analyticsRepository.delete({ writingId: id });
+
+    // Delete all related writing suggestions
+    await this.writingSuggestionRepository.delete({ writingId: id });
+
+    // Finally delete the writing itself
     await this.writingRepository.delete(id);
 
     return { message: `Writing with ID ${id} has been deleted successfully` };

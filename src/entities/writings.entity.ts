@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from './users.entity';
 import { Analytics } from './analysis.entity';
+import { WritingSuggestion } from './writing-suggestion.entity';
 
 @Entity({ name: 'writings', schema: 'public' })
 export class Writing {
@@ -79,4 +80,10 @@ export class Writing {
     onDelete: 'CASCADE',
   })
   analyses!: Analytics[];
+
+  @OneToMany(() => WritingSuggestion, (suggestion) => suggestion.writing, {
+    cascade: ['remove'],
+    onDelete: 'CASCADE',
+  })
+  suggestions!: WritingSuggestion[];
 }
