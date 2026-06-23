@@ -6,12 +6,22 @@ const SWAGGER_PATH = 'docs';
 const SWAGGER_CDN_VERSION = '5.11.0';
 const SWAGGER_CDN_BASE = `https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/${SWAGGER_CDN_VERSION}`;
 
-function getPublicBaseUrl(): string {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+/**
+ * OpenAPI server URL for Swagger "Try it out".
+ * - Default `/` → Swagger dùng đúng domain trình duyệt đang mở (prod, preview, local).
+ * - Override: API_PUBLIC_URL=https://ai-wrining-personally.vercel.app
+ */
+function getSwaggerServerUrl(): string {
+  const explicit = process.env.API_PUBLIC_URL?.trim();
+  if (explicit) {
+    return explicit.replace(/\/$/, '');
   }
 
-  return `http://localhost:${ENV.APP_PORT ?? 8000}`;
+  if (process.env.NODE_ENV !== 'production') {
+    return `http://localhost:${ENV.APP_PORT ?? 8000}`;
+  }
+
+  return '/';
 }
 
 export const setupSwagger = (app: INestApplication) => {
@@ -19,7 +29,7 @@ export const setupSwagger = (app: INestApplication) => {
     .setTitle('AI Writing API')
     .setDescription('API cho ứng dụng Viết & Chấm Văn')
     .setVersion('1.0')
-    .addServer(getPublicBaseUrl())
+    .addServer(getSwaggerServerUrl())
     .addBearerAuth()
     .build();
 
