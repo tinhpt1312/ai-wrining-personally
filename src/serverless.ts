@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { Express } from 'express';
-import { createNestExpressApp } from './bootstrap';
+import { createNestExpressApp } from './main';
 
 let cachedServer: Express | null = null;
 
