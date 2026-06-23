@@ -12,9 +12,15 @@ function parseModelList(value: string | undefined, defaults: string[]): string[]
   return [...new Set(models)];
 }
 
+function normalizeOrigin(url: string): string {
+  return url.trim().replace(/\/$/, '');
+}
+
 export const ENV = {
   APP_PORT: process.env.APP_PORT ?? 8000,
-  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
+  FRONTEND_URL: normalizeOrigin(
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+  ),
 
   DATABASE: {
     HOST: process.env.DB_HOST,
