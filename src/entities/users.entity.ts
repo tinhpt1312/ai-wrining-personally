@@ -9,6 +9,7 @@ import {
 import { Writing } from './writings.entity';
 import { Analytics } from './analysis.entity';
 import { UserTokenUsage } from './user-token-usage.entity';
+import { Role } from 'src/common/enums/role.enum';
 
 @Entity({ name: 'users', schema: 'public' })
 export class User {
@@ -55,6 +56,14 @@ export class User {
     default: true,
   })
   isActive!: boolean;
+
+  @Column({
+    name: 'role',
+    type: 'character varying',
+    length: 50,
+    default: Role.USER,
+  })
+  role!: Role;
 
   @CreateDateColumn({
     name: 'created_at',

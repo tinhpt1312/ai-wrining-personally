@@ -9,14 +9,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Analytics, Writing } from 'src/entities';
-import { Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   CreateAnalyticsDTO,
   QueryAnalyticsDTO,
   UpdateAnalyticsDTO,
   CreateAiAnalyticsDTO,
 } from './dto';
-import { OpenAiProvider } from '../ai/providers/openai.provider';
+import { GeminiProvider } from '../ai/providers/gemini.provider';
 import { PromptTemplatesService } from '../ai/services/prompt-templates.service';
 import { ResponseParserService } from './services/response-parser.service';
 import { TokenTrackerService } from './services/token-tracker.service';
@@ -33,7 +33,7 @@ export class AnalyticsService {
     private readonly analysisRepository: Repository<Analytics>,
     @InjectRepository(Writing)
     private readonly writingRepository: Repository<Writing>,
-    private readonly openAiProvider: OpenAiProvider,
+    private readonly geminiProvider: GeminiProvider,
     private readonly promptTemplatesService: PromptTemplatesService,
     private readonly responseParserService: ResponseParserService,
     private readonly tokenTrackerService: TokenTrackerService,
@@ -115,7 +115,7 @@ export class AnalyticsService {
         writingType,
       );
 
-      const estimatedTokens = TokenEstimator.estimateTotalTokens(prompt, 500);
+      const estimatedTokens = TokenEstimator.estimateTotalTokens(prompt, 2000);
 
       this.logger.debug(
         `Estimated tokens for analysis: ${estimatedTokens} for writing ${writing.id}`,
@@ -141,10 +141,11 @@ export class AnalyticsService {
         );
       }
 
-      // Step 4: Call OpenAI API
-      this.logger.debug(`Calling OpenAI API for writing ${writing.id}`);
-      const aiResponse = await this.openAiProvider.generateAnalytics({
+      // Step 4: Call Gemini API
+      this.logger.debug(`Calling Gemini API for writing ${writing.id}`);
+      const aiResponse = await this.geminiProvider.generateAnalytics({
         prompt,
+        maxTokens: 4500,
       });
 
       // Step 5: Parse and validate response
@@ -204,7 +205,7 @@ export class AnalyticsService {
         throw error;
       }
 
-      // Handle OpenAI errors
+      // Handle Gemini errors
       const errorDetails = AiErrorHandler.handle(error);
       const httpStatus =
         errorDetails.statusCode === 429
@@ -460,327 +461,4 @@ export class AnalyticsService {
     };
   }
 
-  async getUserAnalytics(userId: string) {
-    const writings = await this.writingRepository.find({
-      where: { userId },
-      order: { createdAt: 'DESC' },
-    });
-
-    const analyses = await this.analysisRepository.find({
-      where: { userId },
-      order: { createdAt: 'DESC' },
-    });
-
-    const totalSubmissions = writings.length;
-    const totalWords = writings.reduce(
-      (sum, w) => sum + (w.content.split(/\s+/).length || 0),
-      0,
-    );
-
-    // Calculate average score
-    const scores = analyses.map((a) => {
-      try {
-        if (a.feedbackJson && typeof a.feedbackJson === 'object') {
-          const fb = a.feedbackJson as any;
-          return fb.overallScore || fb.score || 0;
-        }
-      } catch (e) {
-        return 0;
-      }
-      return 0;
-    });
-
-    const averageScore =
-      scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-
-    // Submissions by date (last 30 days)
-    const submissionsByDate = this.groupByDate(writings, 30);
-    const scoresTrend = this.getScoresTrend(analyses, 30);
-    const wordCountTrend = this.getWordCountTrend(writings, 30);
-
-    // Calculate improvement percentage
-    const improvementPercentage = this.calculateImprovement(scores);
-
-    return {
-      totalSubmissions,
-      totalWords,
-      averageScore: Math.round(averageScore * 100) / 100,
-      submissionsByDate,
-      scoresTrend,
-      wordCountTrend,
-      improvementPercentage,
-    };
-  }
-
-  /**
-   * Get daily statistics for user
-   */
-  async getDailyStats(userId: string): Promise<{
-    today: number;
-    thisWeek: number;
-    thisMonth: number;
-  }> {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const monthAgo = new Date(today);
-    monthAgo.setMonth(monthAgo.getMonth() - 1);
-
-    const todayCount = await await this.writingRepository
-      .createQueryBuilder('writing')
-      .where('writing.userId = :userId', { userId })
-      .andWhere('writing.createdAt > :currentStart', { today })
-      .getCount();
-
-    const weekCount = await this.writingRepository
-      .createQueryBuilder('writing')
-      .where('writing.userId = :userId', { userId })
-      .andWhere('writing.createdAt > :currentStart', { weekAgo })
-      .getCount();
-
-    const monthCount = await this.writingRepository
-      .createQueryBuilder('writing')
-      .where('writing.userId = :userId', { userId })
-      .andWhere('writing.createdAt > :currentStart', { monthAgo })
-      .getCount();
-
-    return { today: todayCount, thisWeek: weekCount, thisMonth: monthCount };
-  }
-
-  /**
-   * Get writing categories breakdown
-   */
-  async getWritingsByType(userId: string): Promise<
-    {
-      type: string;
-      count: number;
-    }[]
-  > {
-    const writings = await this.writingRepository.find({
-      where: { userId },
-    });
-
-    const typeMap = new Map<string, number>();
-    writings.forEach((w) => {
-      const count = typeMap.get(w.type) || 0;
-      typeMap.set(w.type, count + 1);
-    });
-
-    return Array.from(typeMap.entries()).map(([type, count]) => ({
-      type,
-      count,
-    }));
-  }
-
-  /**
-   * Get user's progress compared to previous period
-   */
-  async getProgressComparison(
-    userId: string,
-    days: number = 30,
-  ): Promise<{
-    currentPeriod: { submissions: number; avgScore: number };
-    previousPeriod: { submissions: number; avgScore: number };
-    improvement: number;
-  }> {
-    const now = new Date();
-    const currentStart = new Date(now);
-    currentStart.setDate(currentStart.getDate() - days);
-
-    const previousStart = new Date(currentStart);
-    previousStart.setDate(previousStart.getDate() - days);
-
-    // Current period
-    const currentWritings = await this.writingRepository
-      .createQueryBuilder('writing')
-      .where('writing.userId = :userId', { userId })
-      .andWhere('writing.createdAt > :currentStart', { currentStart })
-      .getMany();
-
-    const currentAnalyses = await this.analysisRepository
-      .createQueryBuilder('analysis')
-      .where('analysis.userId = :userId', { userId })
-      .andWhere('analysis.createdAt > :currentStart', { currentStart })
-      .getMany();
-
-    // Previous period
-    const previousWritings = await this.writingRepository.find({
-      where: {
-        userId,
-        createdAt: Between(previousStart, currentStart),
-      },
-    });
-
-    const previousAnalyses = await this.analysisRepository.find({
-      where: {
-        userId,
-        createdAt: Between(previousStart, currentStart),
-      },
-    });
-
-    const getCurrentAvgScore = () => {
-      const scores = currentAnalyses.map((a) => {
-        try {
-          if (a.feedbackJson && typeof a.feedbackJson === 'object') {
-            const fb = a.feedbackJson as any;
-            return fb.overallScore || fb.score || 0;
-          }
-        } catch (e) {
-          return 0;
-        }
-        return 0;
-      });
-      return scores.length > 0
-        ? scores.reduce((a, b) => a + b, 0) / scores.length
-        : 0;
-    };
-
-    const getPreviousAvgScore = () => {
-      const scores = previousAnalyses.map((a) => {
-        try {
-          if (a.feedbackJson && typeof a.feedbackJson === 'object') {
-            const fb = a.feedbackJson as any;
-            return fb.overallScore || fb.score || 0;
-          }
-        } catch (e) {
-          return 0;
-        }
-        return 0;
-      });
-      return scores.length > 0
-        ? scores.reduce((a, b) => a + b, 0) / scores.length
-        : 0;
-    };
-
-    const currentAvg = getCurrentAvgScore();
-    const previousAvg = getPreviousAvgScore();
-
-    return {
-      currentPeriod: {
-        submissions: currentWritings.length,
-        avgScore: currentAvg,
-      },
-      previousPeriod: {
-        submissions: previousWritings.length,
-        avgScore: previousAvg,
-      },
-      improvement: ((currentAvg - previousAvg) / (previousAvg || 1)) * 100,
-    };
-  }
-
-  /**
-   * Helper: Group writings by date
-   */
-  private groupByDate(
-    writings: Writing[],
-    days: number,
-  ): { date: string; count: number }[] {
-    const dateMap = new Map<string, number>();
-    const now = new Date();
-
-    for (let i = 0; i < days; i++) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      dateMap.set(dateStr, 0);
-    }
-
-    writings.forEach((w) => {
-      const dateStr = w.createdAt.toISOString().split('T')[0];
-      if (dateMap.has(dateStr)) {
-        dateMap.set(dateStr, (dateMap.get(dateStr) || 0) + 1);
-      }
-    });
-
-    return Array.from(dateMap.entries())
-      .map(([date, count]) => ({ date, count }))
-      .reverse();
-  }
-
-  /**
-   * Helper: Get scores trend
-   */
-  private getScoresTrend(
-    analyses: Analytics[],
-    days: number,
-  ): { date: string; score: number }[] {
-    const trend: { date: string; score: number }[] = [];
-    const now = new Date();
-
-    for (let i = 0; i < days; i++) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-
-      const dayAnalyses = analyses.filter(
-        (a) => a.createdAt.toISOString().split('T')[0] === dateStr,
-      );
-
-      if (dayAnalyses.length > 0) {
-        const scores = dayAnalyses.map((a) => {
-          try {
-            if (a.feedbackJson && typeof a.feedbackJson === 'object') {
-              const fb = a.feedbackJson as any;
-              return fb.overallScore || fb.score || 0;
-            }
-          } catch (e) {
-            return 0;
-          }
-          return 0;
-        });
-
-        const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-        trend.push({ date: dateStr, score: Math.round(avgScore * 100) / 100 });
-      }
-    }
-
-    return trend.reverse();
-  }
-
-  /**
-   * Helper: Get word count trend
-   */
-  private getWordCountTrend(
-    writings: Writing[],
-    days: number,
-  ): { date: string; words: number }[] {
-    const trend: { date: string; words: number }[] = [];
-    const now = new Date();
-
-    for (let i = 0; i < days; i++) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-
-      const dayWritings = writings.filter(
-        (w) => w.createdAt.toISOString().split('T')[0] === dateStr,
-      );
-
-      if (dayWritings.length > 0) {
-        const totalWords = dayWritings.reduce(
-          (sum, w) => sum + (w.content.split(/\s+/).length || 0),
-          0,
-        );
-        trend.push({ date: dateStr, words: totalWords });
-      }
-    }
-
-    return trend.reverse();
-  }
-
-  /**
-   * Helper: Calculate improvement percentage
-   */
-  private calculateImprovement(scores: number[]): number {
-    if (scores.length < 2) return 0;
-
-    const firstQuarter = Math.ceil(scores.length / 4);
-    const first =
-      scores.slice(0, firstQuarter).reduce((a, b) => a + b, 0) / firstQuarter;
-    const last =
-      scores.slice(-firstQuarter).reduce((a, b) => a + b, 0) / firstQuarter;
-
-    return ((last - first) / (first || 1)) * 100;
-  }
 }

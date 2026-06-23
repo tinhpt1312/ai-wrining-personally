@@ -24,67 +24,48 @@ import { WritingsService } from './writings.service';
 export class WritingsController {
   constructor(private readonly writingsService: WritingsService) {}
 
-  /**
-   * Create a new writing
-   */
   @Post()
   async create(@Body() dto: CreateWritingDTO, @Req() req: RequestWithUser) {
-    const userId = req.user.userId;
-    return this.writingsService.create(userId, dto);
+    return this.writingsService.create(req.user.userId, dto);
   }
 
-  /**
-   * Get all writings for the current user with pagination and filtering
-   */
+  @Get('stats/overview')
+  async getStats(@Req() req: RequestWithUser) {
+    return this.writingsService.getStats(req.user.userId);
+  }
+
+  @Get('public')
+  async findAllPublic(@Query() query: QueryWritingDTO) {
+    return this.writingsService.findAllPublic(query);
+  }
+
   @Get()
   async findAll(@Query() query: QueryWritingDTO, @Req() req: RequestWithUser) {
-    const userId = req.user.userId;
-    return this.writingsService.findAll(userId, query);
+    return this.writingsService.findAll(req.user.userId, query);
   }
 
-  /**
-   * Get a single writing by ID
-   */
   @Get(':id')
   async findOne(
     @Param('id') id: string,
     @Req() req: RequestWithUser,
   ): Promise<Writing> {
-    const userId = req.user.userId;
-    return this.writingsService.findOne(id, userId);
+    return this.writingsService.findOne(id, req.user.userId);
   }
 
-  /**
-   * Update a writing
-   */
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateWritingDTO,
     @Req() req: RequestWithUser,
   ): Promise<Writing> {
-    const userId = req.user.userId;
-    return this.writingsService.update(id, userId, dto);
+    return this.writingsService.update(id, req.user.userId, dto);
   }
 
-  /**
-   * Delete a writing
-   */
   @Delete(':id')
   async remove(
     @Param('id') id: string,
     @Req() req: RequestWithUser,
   ): Promise<{ message: string }> {
-    const userId = req.user.userId;
-    return this.writingsService.remove(id, userId);
-  }
-
-  /**
-   * Get writing statistics
-   */
-  @Get('stats/overview')
-  async getStats(@Req() req: RequestWithUser) {
-    const userId = req.user.userId;
-    return this.writingsService.getStats(userId);
+    return this.writingsService.remove(id, req.user.userId);
   }
 }

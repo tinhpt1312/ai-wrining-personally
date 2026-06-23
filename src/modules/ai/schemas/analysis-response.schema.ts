@@ -21,6 +21,7 @@ export const WritingAnalyticsSchema = z.object({
   strengths: z.array(z.string().min(5).max(150)).min(2).max(5),
   areasForImprovement: z.array(z.string().min(5).max(150)).min(2).max(5),
   actionItems: z.array(z.string().min(5).max(150)).min(2).max(5),
+  sampleWriting: z.string().min(100).max(20000).optional(),
 });
 
 export type WritingAnalytics = z.infer<typeof WritingAnalyticsSchema>;

@@ -1,0 +1,46 @@
+---
+description: Quy chuẩn clean code cho ai-writing-personally
+alwaysApply: true
+---
+
+# Clean Code — Backend (ai-writing-personally)
+
+NestJS API. Mọi code mới phải tuân thủ các nguyên tắc sau.
+
+## Single Responsibility (SRP)
+
+- Mỗi file/class/function chỉ làm **một việc rõ ràng**.
+- NestJS Controller: routing + validation; **không** chứa business logic.
+- NestJS Service: business logic của **một module**; **không** gọi controller.
+
+## Module boundaries
+
+- Mỗi feature/domain = một module độc lập (auth, writings, analysis, …).
+- **Không** import chéo logic giữa module; dùng public API (export) hoặc shared layer.
+- Shared code đặt ở `src/common/`.
+
+## Constants tập trung
+
+- **Không** hard-code string/number lặp lại (route, role, limit, cookie name, …).
+- `constants/` trong module hoặc `src/common/constants/` cho dùng chung.
+
+```typescript
+// ✅ GOOD — src/common/constants/roles.constants.ts
+export const USER_ROLES = { USER: 'user', ADMIN: 'admin' } as const;
+
+// ❌ BAD — magic string trong service
+if (user.role === 'admin') ...
+```
+
+## Đặt tên & cấu trúc file
+
+- File: `kebab-case` hoặc theo convention NestJS hiện có.
+- Service: `*.service.ts`; DTO: `*.dto.ts`; entity: `*.entity.ts`.
+- Export named qua barrel khi phù hợp.
+
+## Code quality
+
+- TypeScript strict; không dùng `any` trừ khi bắt buộc và có comment giải thích.
+- Xử lý lỗi rõ ràng; không swallow exception.
+- Comment chỉ cho logic nghiệp vụ không hiển nhiên.
+- Diff tối thiểu — không refactor ngoài phạm vi task.

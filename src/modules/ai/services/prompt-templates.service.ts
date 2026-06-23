@@ -4,6 +4,47 @@ import { Writing } from 'src/entities';
 
 @Injectable()
 export class PromptTemplatesService {
+  private getResponseFormatBlock(): string {
+    return `
+      **Định dạng Phản hồi:**
+      Trả về CHỈ một đối tượng JSON hợp lệ (không dùng markdown), toàn bộ nội dung bằng tiếng Việt:
+      {
+        "structure": {
+          "score": <số 1-10>,
+          "feedback": "<phản hồi cụ thể>",
+          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
+        },
+        "clarity": {
+          "score": <số 1-10>,
+          "feedback": "<phản hồi cụ thể>",
+          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
+        },
+        "tone": {
+          "score": <số 1-10>,
+          "feedback": "<phản hồi cụ thể>",
+          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
+        },
+        "coherence": {
+          "score": <số 1-10>,
+          "feedback": "<phản hồi cụ thể>",
+          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
+        },
+        "overallFeedback": "<tóm tắt toàn diện 2-3 câu>",
+        "strengths": ["<điểm mạnh 1>", "<điểm mạnh 2>", "<điểm mạnh 3>"],
+        "areasForImprovement": ["<lĩnh vực 1>", "<lĩnh vực 2>", "<lĩnh vực 3>"],
+        "actionItems": ["<hành động 1>", "<hành động 2>", "<hành động 3>"],
+        "sampleWriting": "<bài viết mẫu hoàn chỉnh>"
+      }
+
+      **Yêu cầu trường sampleWriting (bài viết mẫu):**
+      - Viết một bài hoàn chỉnh cùng thể loại và chủ đề với bài gốc
+      - Áp dụng các gợi ý cải thiện từ phản hồi phía trên
+      - Giữ ý chính của tác giả nhưng trình bày rõ ràng, mạch lạc hơn
+      - Không sao chép nguyên văn bài gốc
+      - Độ dài tương đương hoặc dài hơn bài gốc để người đọc hình dung được bản viết tốt
+    `;
+  }
+
   /**
    * Get specialized prompt based on writing type
    */
@@ -48,34 +89,7 @@ export class PromptTemplatesService {
       - Đề xuất 2-3 cải tiến cụ thể
       - Đối với viết cá nhân, cân nhắc tính xác thực cảm xúc và chất lượng tự suy ngẫm
 
-      **Định dạng Phản hồi:**
-      Trả về một đối tượng JSON với cấu trúc chính xác này:
-      {
-        "structure": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "clarity": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "tone": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "coherence": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "overallFeedback": "<tóm tắt toàn diện 2-3 câu>",
-        "strengths": ["<điểm mạnh 1>", "<điểm mạnh 2>", "<điểm mạnh 3>"],
-        "areasForImprovement": ["<lĩnh vực 1>", "<lĩnh vực 2>", "<lĩnh vực 3>"],
-        "actionItems": ["<hành động 1>", "<hành động 2>", "<hành động 3>"]
-      }
+      ${this.getResponseFormatBlock()}
 
       Hãy khuyến khích nhưng trung thực. Tập trung vào sự phát triển và tiến bộ.
     `;
@@ -108,34 +122,7 @@ export class PromptTemplatesService {
       - Kiểm tra luồng logic và khả năng thuyết phục
       - Đánh giá từ vựng và sự tinh vi của ngôn ngữ
 
-      **Định dạng Phản hồi:**
-      Trả về một đối tượng JSON với cấu trúc chính xác này:
-      {
-        "structure": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "clarity": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "tone": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "coherence": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "overallFeedback": "<tóm tắt toàn diện 2-3 câu>",
-        "strengths": ["<điểm mạnh 1>", "<điểm mạnh 2>", "<điểm mạnh 3>"],
-        "areasForImprovement": ["<lĩnh vực 1>", "<lĩnh vực 2>", "<lĩnh vực 3>"],
-        "actionItems": ["<hành động 1>", "<hành động 2>", "<hành động 3>"]
-      }
+      ${this.getResponseFormatBlock()}
 
       Tập trung vào chất lượng lập luận và hiệu quả giao tiếp.
     `;
@@ -168,34 +155,7 @@ export class PromptTemplatesService {
       - Đánh giá chất lượng của những hiểu biết sâu sắc và học tập
       - Xem xét tác giả kết nối quan sát với hiểu biết sâu hơn như thế nào
 
-      **Định dạng Phản hồi:**
-      Trả về một đối tượng JSON với cấu trúc chính xác này:
-      {
-        "structure": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "clarity": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "tone": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "coherence": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "overallFeedback": "<tóm tắt toàn diện 2-3 câu>",
-        "strengths": ["<điểm mạnh 1>", "<điểm mạnh 2>", "<điểm mạnh 3>"],
-        "areasForImprovement": ["<lĩnh vực 1>", "<lĩnh vực 2>", "<lĩnh vực 3>"],
-        "actionItems": ["<hành động 1>", "<hành động 2>", "<hành động 3>"]
-      }
+      ${this.getResponseFormatBlock()}
 
       Nhấn mạnh độ sâu của hiểu biết sâu sắc và sự phát triển cá nhân. Hãy hỗ trợ hành trình suy ngẫm.
     `;
@@ -221,34 +181,7 @@ export class PromptTemplatesService {
       3. Giọng điệu & Phong cách
       4. Sự liên kết Chung
 
-      **Định dạng Phản hồi:**
-      Trả về một đối tượng JSON với cấu trúc chính xác này:
-      {
-        "structure": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "clarity": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "tone": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "coherence": {
-          "score": <số 1-10>,
-          "feedback": "<phản hồi cụ thể>",
-          "suggestions": ["<đề xuất 1>", "<đề xuất 2>"]
-        },
-        "overallFeedback": "<tóm tắt toàn diện 2-3 câu>",
-        "strengths": ["<điểm mạnh 1>", "<điểm mạnh 2>", "<điểm mạnh 3>"],
-        "areasForImprovement": ["<lĩnh vực 1>", "<lĩnh vực 2>", "<lĩnh vực 3>"],
-        "actionItems": ["<hành động 1>", "<hành động 2>", "<hành động 3>"]
-      }
+      ${this.getResponseFormatBlock()}
 
       Cung cấp phản hồi xây dựng, khuyến khích tập trung vào cải tiến.
     `;

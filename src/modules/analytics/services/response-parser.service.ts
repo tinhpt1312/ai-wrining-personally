@@ -180,8 +180,8 @@ export class ResponseParserService {
   private fillPartialData(partial: any): Partial<WritingAnalytics> {
     const defaultFeedback = {
       score: 5,
-      feedback: 'Analytics in progress',
-      suggestions: ['Please review the feedback provided'],
+      feedback: 'Đang phân tích chi tiết',
+      suggestions: ['Vui lòng xem lại phản hồi đã cung cấp'],
     };
 
     return {
@@ -191,22 +191,23 @@ export class ResponseParserService {
       coherence: partial.coherence || defaultFeedback,
       overallFeedback:
         partial.overallFeedback ||
-        'Overall analysis: The writing shows potential for improvement across multiple dimensions.',
+        'Tổng quan: Bài viết có tiềm năng cải thiện ở nhiều khía cạnh.',
       strengths: partial.strengths || [
-        'Clear intent',
-        'Authentic voice',
-        'Engaging content',
+        'Ý tưởng rõ ràng',
+        'Giọng văn chân thật',
+        'Nội dung hấp dẫn',
       ],
       areasForImprovement: partial.areasForImprovement || [
-        'Structure clarity',
-        'Coherence and flow',
-        'Supporting examples',
+        'Cấu trúc bài viết',
+        'Mạch lạc và liên kết',
+        'Ví dụ minh họa',
       ],
       actionItems: partial.actionItems || [
-        'Review feedback carefully',
-        'Practice writing regularly',
-        'Seek peer feedback',
+        'Đọc kỹ phản hồi',
+        'Luyện viết thường xuyên',
+        'Nhờ người khác góp ý thêm',
       ],
+      sampleWriting: partial.sampleWriting,
     };
   }
 
@@ -219,39 +220,48 @@ export class ResponseParserService {
 
     normalized.structure = this.normalizeFeedbackItem(
       normalized.structure,
-      'Structure feedback is still being refined.',
+      'Phản hồi về bố cục đang được hoàn thiện.',
     );
     normalized.clarity = this.normalizeFeedbackItem(
       normalized.clarity,
-      'Clarity feedback is still being refined.',
+      'Phản hồi về độ rõ ràng đang được hoàn thiện.',
     );
     normalized.tone = this.normalizeFeedbackItem(
       normalized.tone,
-      'Tone feedback is still being refined.',
+      'Phản hồi về giọng văn đang được hoàn thiện.',
     );
     normalized.coherence = this.normalizeFeedbackItem(
       normalized.coherence,
-      'Coherence feedback is still being refined.',
+      'Phản hồi về sự liên kết đang được hoàn thiện.',
     );
 
     normalized.overallFeedback =
       typeof normalized.overallFeedback === 'string' &&
       normalized.overallFeedback.trim().length >= 20
         ? normalized.overallFeedback.trim().slice(0, 500)
-        : 'The writing has useful ideas and can improve with clearer structure, stronger transitions, and more specific supporting details.';
+        : 'Bài viết có ý tưởng hay và có thể cải thiện thêm về cấu trúc, mạch lạc và chi tiết minh họa.';
 
     normalized.strengths = this.normalizeStringList(normalized.strengths, [
-      'Clear writing intent',
-      'Authentic voice',
+      'Ý tưởng rõ ràng',
+      'Giọng văn chân thật',
     ]);
     normalized.areasForImprovement = this.normalizeStringList(
       normalized.areasForImprovement,
-      ['Structure clarity', 'Coherence and flow'],
+      ['Cấu trúc bài viết', 'Mạch lạc và liên kết'],
     );
     normalized.actionItems = this.normalizeStringList(normalized.actionItems, [
-      'Review the feedback carefully',
-      'Revise one section at a time',
+      'Đọc kỹ phản hồi',
+      'Sửa từng phần một',
     ]);
+
+    if (
+      typeof normalized.sampleWriting === 'string' &&
+      normalized.sampleWriting.trim().length >= 100
+    ) {
+      normalized.sampleWriting = normalized.sampleWriting.trim().slice(0, 20000);
+    } else {
+      delete normalized.sampleWriting;
+    }
 
     return normalized;
   }
@@ -268,7 +278,7 @@ export class ResponseParserService {
         : fallbackFeedback;
 
     const suggestions = this.normalizeStringList(item?.suggestions, [
-      'Revise this area with one specific improvement',
+      'Cải thiện phần này với một gợi ý cụ thể',
     ]).slice(0, 5);
 
     return {

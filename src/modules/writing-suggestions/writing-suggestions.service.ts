@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { WritingSuggestion, Writing } from 'src/entities';
 import { Repository } from 'typeorm';
-import { OpenAiProvider } from '../ai/providers/openai.provider';
+import { GeminiProvider } from '../ai/providers/gemini.provider';
 
 export interface SuggestionDTO {
   type: string;
@@ -33,7 +33,7 @@ export class WritingSuggestionsService {
     private readonly suggestionRepository: Repository<WritingSuggestion>,
     @InjectRepository(Writing)
     private readonly writingRepository: Repository<Writing>,
-    private readonly openAiProvider: OpenAiProvider,
+    private readonly geminiProvider: GeminiProvider,
   ) {}
 
   /**
@@ -100,7 +100,7 @@ export class WritingSuggestionsService {
 
     try {
       // Use AI provider to generate suggestions
-      const suggestions = await this.openAiProvider.generateWritingSuggestions(
+      const suggestions = await this.geminiProvider.generateWritingSuggestions(
         writing.content,
         req?.focusAreas || [],
       );

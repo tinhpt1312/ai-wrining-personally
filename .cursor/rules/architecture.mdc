@@ -1,0 +1,65 @@
+---
+description: Kiến trúc Backend NestJS — module, service, constants
+globs: **/*
+alwaysApply: false
+---
+
+# Backend Architecture (ai-writing-personally)
+
+## Cấu trúc module NestJS
+
+```
+src/modules/{module}/
+  {module}.module.ts
+  {module}.controller.ts   # HTTP layer only
+  {module}.service.ts      # business logic — 1 module = 1 service chính
+  dto/
+  constants/               # constant riêng module (nếu cần)
+src/common/
+  constants/               # JWT, roles, shared enums
+  guards/
+  decorators/
+```
+
+## Trách nhiệm từng layer
+
+| Layer | Làm | Không làm |
+|-------|-----|-----------|
+| Controller | Route, DTO validation, gọi service | Query DB, gọi AI API |
+| Service | Business logic, orchestration | HTTP response formatting |
+| Provider (AI) | Gọi external API (Gemini) | Auth, DB trực tiếp nếu có service |
+| Entity | Schema DB | Logic |
+
+## Service theo module
+
+- Mỗi domain một `*.service.ts`: `AuthService`, `WritingsService`, `AiService`.
+- Service **không** import service module khác trừ khi được inject qua module exports.
+- Shared logic → `src/common/` hoặc base class, không copy-paste.
+
+## Constants tập trung
+
+```typescript
+// ✅ src/common/constants/roles.constants.ts
+export const USER_ROLES = { USER: 'user', ADMIN: 'admin' } as const;
+
+// ✅ src/modules/ai/constants/prompt.constants.ts
+export const AI_PROMPT_LIMITS = { MAX_TOKENS: 4096 } as const;
+
+// ❌ BAD — magic string trong service
+if (user.role === 'admin') ...
+```
+
+## DTO & validation
+
+- Mọi input HTTP qua `class-validator` DTO.
+- Response type rõ ràng; không trả entity TypeORM trực tiếp nếu có field nhạy cảm.
+
+## Config & env
+
+- Biến môi trường đọc qua `env.config.ts`; không `process.env` rải rác trong service.
+- Secret không log, không commit `.env`.
+
+## Migration & entity
+
+- Schema change = migration TypeORM mới; không sửa migration đã chạy.
+- Entity đặt tại `src/entities/`, import qua barrel nếu có.

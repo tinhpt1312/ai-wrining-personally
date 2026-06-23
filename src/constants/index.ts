@@ -1,6 +1,6 @@
 import { ENV } from 'src/config/env.config';
 
-export const BASE_URL_AI = 'https://openrouter.ai/api/v1';
+export { DEFAULT_AI_MODEL } from './ai.model';
 
 export const CORS_OPTIONS = {
   origin: ENV.FRONTEND_URL || 'http://localhost:3000',

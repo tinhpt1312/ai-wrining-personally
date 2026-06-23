@@ -85,7 +85,82 @@ export class WritingsService {
   }
 
   /**
-   * Get a single writing by ID
+   * Browse public writings from all users
+   */
+  async findAllPublic(query: QueryWritingDTO) {
+    const { limit = 10, offset = 0, type, search } = query;
+
+    const queryBuilder = this.writingRepository
+      .createQueryBuilder('writing')
+      .innerJoinAndSelect('writing.user', 'user')
+      .where('writing.status = :status', { status: WritingStatusEnum.PUBLIC });
+
+    if (type) {
+      queryBuilder.andWhere('writing.type = :type', { type });
+    }
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(writing.title ILIKE :search OR writing.content ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    queryBuilder.orderBy('writing.created_at', 'DESC').skip(offset).take(limit);
+
+    const [writings, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data: writings.map((writing) => this.toPublicWriting(writing)),
+      pagination: {
+        limit,
+        offset,
+        total,
+        hasMore: offset + limit < total,
+      },
+    };
+  }
+
+  /**
+   * Public writings by a specific author username
+   */
+  async findPublicByUsername(username: string, query: QueryWritingDTO) {
+    const { limit = 10, offset = 0, type, search } = query;
+
+    const queryBuilder = this.writingRepository
+      .createQueryBuilder('writing')
+      .innerJoinAndSelect('writing.user', 'user')
+      .where('writing.status = :status', { status: WritingStatusEnum.PUBLIC })
+      .andWhere('user.username = :username', { username });
+
+    if (type) {
+      queryBuilder.andWhere('writing.type = :type', { type });
+    }
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(writing.title ILIKE :search OR writing.content ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    queryBuilder.orderBy('writing.created_at', 'DESC').skip(offset).take(limit);
+
+    const [writings, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data: writings.map((writing) => this.toPublicWriting(writing)),
+      pagination: {
+        limit,
+        offset,
+        total,
+        hasMore: offset + limit < total,
+      },
+    };
+  }
+
+  /**
+   * Get a single writing — owner always; others only if public
    */
   async findOne(id: string, userId: string): Promise<Writing> {
     if (!id) {
@@ -97,10 +172,40 @@ export class WritingsService {
     }
 
     const writing = await this.writingRepository.findOne({
-      where: {
-        id,
-        userId,
-      },
+      where: { id },
+      relations: { user: true },
+    });
+
+    if (!writing) {
+      throw new NotFoundException(`Writing with ID ${id} not found`);
+    }
+
+    if (
+      writing.userId !== userId &&
+      writing.status !== WritingStatusEnum.PUBLIC
+    ) {
+      throw new ForbiddenException('Bạn không có quyền xem bài viết này');
+    }
+
+    if (writing.user) {
+      Object.assign(writing, {
+        author: {
+          username: writing.user.username,
+          fullName: writing.user.fullName ?? null,
+        },
+      });
+      delete (writing as Partial<Writing>).user;
+    }
+
+    return writing;
+  }
+
+  /**
+   * Owner-only lookup for mutations
+   */
+  private async findOneForOwner(id: string, userId: string): Promise<Writing> {
+    const writing = await this.writingRepository.findOne({
+      where: { id, userId },
     });
 
     if (!writing) {
@@ -110,6 +215,23 @@ export class WritingsService {
     }
 
     return writing;
+  }
+
+  private toPublicWriting(writing: Writing) {
+    return {
+      id: writing.id,
+      userId: writing.userId,
+      title: writing.title,
+      content: writing.content,
+      type: writing.type,
+      status: writing.status,
+      createdAt: writing.createdAt,
+      updatedAt: writing.updatedAt,
+      author: {
+        username: writing.user?.username,
+        fullName: writing.user?.fullName ?? null,
+      },
+    };
   }
 
   /**
@@ -128,19 +250,13 @@ export class WritingsService {
       throw new BadRequestException('User ID is required');
     }
 
-    const writing = await this.findOne(id, userId);
-
-    if (writing.userId !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to update this writing',
-      );
-    }
+    const writing = await this.findOneForOwner(id, userId);
 
     const updatedWriting = this.writingRepository.merge(writing, {
-      title: dto.title || writing.title,
-      content: dto.content || writing.content,
-      type: dto.type || writing.type,
-      status: dto.status || writing.status,
+      title: dto.title ?? writing.title,
+      content: dto.content ?? writing.content,
+      type: dto.type ?? writing.type,
+      status: dto.status ?? writing.status,
     });
 
     return this.writingRepository.save(updatedWriting);
@@ -158,14 +274,7 @@ export class WritingsService {
       throw new BadRequestException('User ID is required');
     }
 
-    const writing = await this.findOne(id, userId);
-
-    if (writing.userId !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to delete this writing',
-      );
-    }
-
+    await this.findOneForOwner(id, userId);
     // Delete all related analyses first
     await this.analyticsRepository.delete({ writingId: id });
 

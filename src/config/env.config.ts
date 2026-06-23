@@ -1,6 +1,16 @@
 import { config } from 'dotenv';
+import { DEFAULT_AI_MODEL, DEFAULT_FALLBACK_MODELS } from 'src/constants/ai.model';
 
 config();
+
+function parseModelList(value: string | undefined, defaults: string[]): string[] {
+  const models = (value ?? defaults.join(','))
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return [...new Set(models)];
+}
 
 export const ENV = {
   APP_PORT: process.env.APP_PORT ?? 8000,
@@ -25,19 +35,16 @@ export const ENV = {
     COOKIE_NAME: process.env.JWT_COOKIE_NAME,
   },
 
-  ONEROUTER: {
-    API_KEY: process.env.ONEROUTER_API_KEY,
-    MODEL: process.env.ONEROUTER_MODEL,
-    TEMPERATURE: Number(process.env.ONEROUTER_TEMPERATURE),
-    MAX_TOKENS: Number(process.env.ONEROUTER_MAX_TOKENS),
-    DAILY_TOKEN_LIMIT: Number(process.env.DAILY_TOKEN_LIMIT),
-    TOKEN_BUFFER_PERCENT: Number(process.env.TOKEN_BUFFER_PERCENT),
-  },
-
-  OPENAI: {
-    API_KEY: process.env.ONEROUTER_API_KEY,
-    MODEL: process.env.ONEROUTER_MODEL,
-    TEMPERATURE: Number(process.env.ONEROUTER_TEMPERATURE),
-    MAX_TOKENS: Number(process.env.ONEROUTER_MAX_TOKENS),
+  GEMINI: {
+    API_KEY: process.env.GEMINI_API_KEY,
+    MODEL: process.env.GEMINI_MODEL || DEFAULT_AI_MODEL,
+    FALLBACK_MODELS: parseModelList(
+      process.env.GEMINI_FALLBACK_MODELS,
+      DEFAULT_FALLBACK_MODELS,
+    ),
+    TEMPERATURE: Number(process.env.GEMINI_TEMPERATURE ?? 0.4),
+    MAX_OUTPUT_TOKENS: Number(process.env.GEMINI_MAX_OUTPUT_TOKENS ?? 4096),
+    DAILY_TOKEN_LIMIT: Number(process.env.DAILY_TOKEN_LIMIT ?? 50000),
+    TOKEN_BUFFER_PERCENT: Number(process.env.TOKEN_BUFFER_PERCENT ?? 0.1),
   },
 };

@@ -6,12 +6,10 @@ import { PostgresConfiguration } from './config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { WritingsModule } from './modules/writings/writings.module';
-import { DailyTipsModule } from './modules/daily-tips/daily-tips.module';
-import { GamificationModule } from './modules/gamification/gamification.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
-import { AchievementsModule } from './modules/achievements/achievements.module';
 import { WritingSuggestionsModule } from './modules/writing-suggestions/writing-suggestions.module';
-import { FeedbackCategoriesModule } from './modules/feedback-categories/feedback-categories.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { ShareModule } from './modules/share/share.module';
 
 @Module({
   imports: [
@@ -26,11 +24,9 @@ import { FeedbackCategoriesModule } from './modules/feedback-categories/feedback
     WritingsModule,
     AnalyticsModule,
     UsersModule,
-    DailyTipsModule,
-    AchievementsModule,
-    FeedbackCategoriesModule,
     WritingSuggestionsModule,
-    GamificationModule,
+    AdminModule,
+    ShareModule,
   ],
   controllers: [],
   providers: [],

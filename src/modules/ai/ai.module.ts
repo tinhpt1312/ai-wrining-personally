@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { OpenAiProvider } from './providers/openai.provider';
+import { GeminiProvider } from './providers/gemini.provider';
 import { PromptTemplatesService } from './services/prompt-templates.service';
 
 @Module({
-  providers: [OpenAiProvider, PromptTemplatesService],
-  exports: [OpenAiProvider, PromptTemplatesService],
+  providers: [GeminiProvider, PromptTemplatesService],
+  exports: [GeminiProvider, PromptTemplatesService],
 })
 export class AiModule {}
