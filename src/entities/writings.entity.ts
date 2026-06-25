@@ -56,6 +56,13 @@ export class Writing {
   })
   status!: string;
 
+  @Column({
+    name: 'outline_json',
+    type: 'jsonb',
+    nullable: true,
+  })
+  outlineJson?: Record<string, unknown> | null;
+
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamp with time zone',

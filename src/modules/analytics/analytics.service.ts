@@ -24,6 +24,12 @@ import { TokenEstimator } from '../ai/utils/token-estimator';
 import { AiErrorHandler } from '../ai/utils/ai-error-handler';
 import type { AiErrorDetails } from '../ai/types/ai.types';
 import { WritingType } from '../ai/types/ai.types';
+import {
+  computeCriterionAverages,
+  computeWritingStreak,
+  findWeakestCriterion,
+  getOverallScore,
+} from './utils/progress.util';
 
 @Injectable()
 export class AnalyticsService {
@@ -277,7 +283,7 @@ export class AnalyticsService {
       'BÀI BÁO': WritingType.ARTICLE,
     };
 
-    return typeMap[writingType] || WritingType.ARTICLE;
+    return typeMap[writingType] || WritingType.SOCIAL_ESSAY;
   }
 
   /**
@@ -472,6 +478,78 @@ export class AnalyticsService {
         totalAnalyses > 0
           ? Math.round((analysesWithFeedback / totalAnalyses) * 100)
           : 0,
+    };
+  }
+
+  /**
+   * Learning progress: score history, criterion averages, writing streak
+   */
+  async getProgress(userId: string) {
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+
+    const analyses = await this.analysisRepository.find({
+      where: { userId },
+      order: { createdAt: 'ASC' },
+      take: 30,
+    });
+
+    const scoreHistory = analyses
+      .map((analysis) => ({
+        id: analysis.id,
+        writingId: analysis.writingId,
+        date: analysis.createdAt.toISOString(),
+        score: getOverallScore(analysis.feedbackJson),
+      }))
+      .filter(
+        (item): item is typeof item & { score: number } => item.score != null,
+      );
+
+    const criterionAverages = computeCriterionAverages(analyses);
+    const weakestCriterion = findWeakestCriterion(criterionAverages);
+
+    const writings = await this.writingRepository.find({
+      where: { userId },
+      select: { createdAt: true, updatedAt: true },
+    });
+
+    const activityDates = writings.flatMap((writing) => [
+      writing.createdAt,
+      writing.updatedAt,
+    ]);
+    const writingStreak = computeWritingStreak(activityDates);
+
+    const scores = scoreHistory.map((item) => item.score);
+    const recentScores = scores.slice(-3);
+    const earlyScores = scores.slice(0, 3);
+    const averageRecent =
+      recentScores.length > 0
+        ? Math.round(
+            (recentScores.reduce((sum, s) => sum + s, 0) / recentScores.length) *
+              10,
+          ) / 10
+        : null;
+    const averageEarly =
+      earlyScores.length > 0
+        ? Math.round(
+            (earlyScores.reduce((sum, s) => sum + s, 0) / earlyScores.length) *
+              10,
+          ) / 10
+        : null;
+
+    return {
+      scoreHistory,
+      criterionAverages,
+      weakestCriterion,
+      writingStreak,
+      totalGraded: scoreHistory.length,
+      averageRecentScore: averageRecent,
+      averageEarlyScore: averageEarly,
+      scoreDelta:
+        averageRecent != null && averageEarly != null
+          ? Math.round((averageRecent - averageEarly) * 10) / 10
+          : null,
     };
   }
 

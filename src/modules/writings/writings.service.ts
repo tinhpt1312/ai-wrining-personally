@@ -14,6 +14,7 @@ import {
 } from 'src/entities';
 import { CreateWritingDTO, UpdateWritingDTO, QueryWritingDTO } from './dto';
 import { WritingStatusEnum } from './enum';
+import { isActiveWritingType } from './constants/active-writing-types';
 
 @Injectable()
 export class WritingsService {
@@ -36,12 +37,19 @@ export class WritingsService {
       throw new BadRequestException('User ID is required');
     }
 
+    if (!isActiveWritingType(dto.type)) {
+      throw new BadRequestException(
+        'Loại bài hiện chỉ hỗ trợ: BÀI LUẬN XÃ HỘI, BÀI LUẬN CÔNG GIÁO',
+      );
+    }
+
     const writing = this.writingRepository.create({
       userId,
       title: dto.title,
       content: dto.content,
       type: dto.type,
       status: dto.status || WritingStatusEnum.DRAFT,
+      outlineJson: dto.outlineJson ?? null,
     });
 
     return this.writingRepository.save(writing);
@@ -259,11 +267,19 @@ export class WritingsService {
 
     const writing = await this.findOneForOwner(id, userId);
 
+    if (dto.type !== undefined && !isActiveWritingType(dto.type)) {
+      throw new BadRequestException(
+        'Loại bài hiện chỉ hỗ trợ: BÀI LUẬN XÃ HỘI, BÀI LUẬN CÔNG GIÁO',
+      );
+    }
+
     const updatedWriting = this.writingRepository.merge(writing, {
       title: dto.title ?? writing.title,
       content: dto.content ?? writing.content,
       type: dto.type ?? writing.type,
       status: dto.status ?? writing.status,
+      outlineJson:
+        dto.outlineJson !== undefined ? dto.outlineJson : writing.outlineJson,
     });
 
     return this.writingRepository.save(updatedWriting);

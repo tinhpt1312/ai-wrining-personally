@@ -6,8 +6,11 @@ import {
   WritingRevision,
   WritingSuggestion,
 } from 'src/entities';
+import { AnalyticsModule } from '../analytics/analytics.module';
+import { AiModule } from '../ai/ai.module';
 import { WritingsService } from './writings.service';
 import { WritingRevisionsService } from './writing-revisions.service';
+import { WritingOutlineService } from './services/writing-outline.service';
 import { WritingsController } from './writings.controller';
 
 @Module({
@@ -18,9 +21,11 @@ import { WritingsController } from './writings.controller';
       WritingSuggestion,
       WritingRevision,
     ]),
+    AnalyticsModule,
+    AiModule,
   ],
   controllers: [WritingsController],
-  providers: [WritingsService, WritingRevisionsService],
-  exports: [WritingsService, WritingRevisionsService],
+  providers: [WritingsService, WritingRevisionsService, WritingOutlineService],
+  exports: [WritingsService, WritingRevisionsService, WritingOutlineService],
 })
 export class WritingsModule {}

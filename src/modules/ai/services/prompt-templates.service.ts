@@ -191,7 +191,66 @@ export class PromptTemplatesService {
    * Get all supported writing types
    */
   getSupportedTypes(): WritingType[] {
-    return Object.values(WritingType);
+    return [WritingType.SOCIAL_ESSAY, WritingType.CATHOLIC_ESSAY];
+  }
+
+  /**
+   * Outline prompt for pre-writing structure
+   */
+  getOutlinePrompt(
+    title: string,
+    type: string,
+    topic?: string,
+  ): string {
+    const topicBlock = topic?.trim()
+      ? `\n**Gợi ý / mô tả đề:**\n${topic.trim()}\n`
+      : '';
+
+    const structureHint = this.getOutlineStructureHint(type);
+
+    return `
+      Tạo dàn ý viết văn tiếng Việt cho học sinh/sinh viên luyện tập.
+
+      **Đề bài:** ${title}
+      **Loại bài:** ${type}
+      ${topicBlock}
+      ${structureHint}
+
+      Trả về CHỈ một JSON hợp lệ (không markdown):
+      {
+        "title": "<tiêu đề gợi ý cho bài viết>",
+        "sections": [
+          {
+            "id": "intro",
+            "label": "<tên phần, VD: Mở bài>",
+            "keyPoints": ["<ý chính 1>", "<ý chính 2>"],
+            "hint": "<gợi ý ngắn cách viết phần này>"
+          }
+        ]
+      }
+
+      **Yêu cầu:**
+      - 3–5 phần (sections) phù hợp loại bài
+      - Mỗi phần có 2–4 keyPoints cụ thể, actionable
+      - hint ngắn gọn (1 câu)
+      - Không viết sẵn đoạn văn hoàn chỉnh — chỉ dàn ý
+      - Toàn bộ bằng tiếng Việt
+    `;
+  }
+
+  private getOutlineStructureHint(type: string): string {
+    switch (type) {
+      case WritingType.SOCIAL_ESSAY:
+        return '**Khung gợi ý:** Mở bài (nêu vấn đề) → Thân bài (2–3 luận điểm + dẫn chứng) → Kết luận (tổng kết + mở rộng).';
+      case WritingType.CATHOLIC_ESSAY:
+        return '**Khung gợi ý:** Mở bài (đặt vấn đề đức tin) → Thân bài (lý luận + Kinh Thánh/Giáo huấn + chiêm ngẫm cá nhân) → Kết luận.';
+      case WritingType.SHORT_STORY:
+        return '**Khung gợi ý:** Bối cảnh/nhân vật → Xung đột → Cao trào → Kết (có ý nghĩa).';
+      case WritingType.ARTICLE:
+        return '**Khung gợi ý:** Lead (tóm tắt tin) → Thân bài (chi tiết theo thứ tự quan trọng) → Kết (bối cảnh/ý nghĩa).';
+      default:
+        return '**Khung gợi ý:** Mở bài → Thân bài → Kết luận.';
+    }
   }
 
   /**

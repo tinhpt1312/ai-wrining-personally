@@ -8,6 +8,8 @@ import { AiModule } from '../ai/ai.module';
 import { ResponseParserService } from './services/response-parser.service';
 import { TokenTrackerService } from './services/token-tracker.service';
 import { TokenResetScheduler } from './services/token-reset.scheduler';
+import { ExportService } from './services/export.service';
+import { TokenLimitGuard } from './guards/token-limit.guard';
 
 @Module({
   imports: [
@@ -21,7 +23,9 @@ import { TokenResetScheduler } from './services/token-reset.scheduler';
     ResponseParserService,
     TokenTrackerService,
     TokenResetScheduler,
+    ExportService,
+    TokenLimitGuard,
   ],
-  exports: [AnalyticsService, TokenTrackerService],
+  exports: [AnalyticsService, TokenTrackerService, ExportService, TokenLimitGuard],
 })
 export class AnalyticsModule {}

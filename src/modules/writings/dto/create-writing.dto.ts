@@ -2,12 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
+  IsObject,
+  IsOptional,
   IsString,
+  IsIn,
   MaxLength,
   MinLength,
-  IsOptional,
 } from 'class-validator';
 import { WritingTypeEnum, WritingStatusEnum } from '../enum';
+import {
+  ACTIVE_WRITING_TYPE_VALUES,
+  ACTIVE_WRITING_TYPE_MESSAGE,
+} from '../constants/active-writing-types';
 
 export class CreateWritingDTO {
   @ApiProperty({
@@ -34,11 +40,11 @@ export class CreateWritingDTO {
 
   @ApiProperty({
     description: 'Type of writing',
-    enum: WritingTypeEnum,
+    enum: ACTIVE_WRITING_TYPE_VALUES,
   })
   @IsNotEmpty({ message: 'Type is required' })
-  @IsEnum(WritingTypeEnum, {
-    message: `Type must be one of: ${Object.values(WritingTypeEnum).join(', ')}`,
+  @IsIn(ACTIVE_WRITING_TYPE_VALUES, {
+    message: ACTIVE_WRITING_TYPE_MESSAGE,
   })
   type: WritingTypeEnum;
 
@@ -54,4 +60,12 @@ export class CreateWritingDTO {
     message: `Status must be one of: ${Object.values(WritingStatusEnum).join(', ')}`,
   })
   status?: WritingStatusEnum;
+
+  @ApiProperty({
+    description: 'Structured outline used when creating the writing',
+    required: false,
+  })
+  @IsOptional()
+  @IsObject()
+  outlineJson?: Record<string, unknown>;
 }

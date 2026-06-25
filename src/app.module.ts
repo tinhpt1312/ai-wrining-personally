@@ -10,6 +10,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { WritingSuggestionsModule } from './modules/writing-suggestions/writing-suggestions.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { ShareModule } from './modules/share/share.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ShareModule } from './modules/share/share.module';
     WritingSuggestionsModule,
     AdminModule,
     ShareModule,
+    DocumentsModule,
   ],
   controllers: [],
   providers: [],

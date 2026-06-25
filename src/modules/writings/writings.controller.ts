@@ -8,11 +8,15 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { Writing } from 'src/entities';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { ExportService } from 'src/modules/analytics/services/export.service';
+import { buildAttachmentDisposition } from 'src/common/utils/content-disposition.util';
 import type { RequestWithUser } from 'src/types';
 import {
   CreateWritingDTO,
@@ -20,9 +24,12 @@ import {
   UpdateWritingDTO,
   CreateWritingRevisionDTO,
   EnsureBaselineRevisionDTO,
+  GenerateOutlineDTO,
 } from './dto';
 import { WritingsService } from './writings.service';
 import { WritingRevisionsService } from './writing-revisions.service';
+import { WritingOutlineService } from './services/writing-outline.service';
+import { TokenLimitGuard } from '../analytics/guards/token-limit.guard';
 
 @ApiTags('writings')
 @ApiBearerAuth()
@@ -32,7 +39,19 @@ export class WritingsController {
   constructor(
     private readonly writingsService: WritingsService,
     private readonly revisionsService: WritingRevisionsService,
+    private readonly exportService: ExportService,
+    private readonly outlineService: WritingOutlineService,
   ) {}
+
+  @Post('outline')
+  @UseGuards(TokenLimitGuard)
+  async generateOutline(
+    @Body() dto: GenerateOutlineDTO,
+    @Req() req: RequestWithUser,
+  ) {
+    const outline = await this.outlineService.generate(req.user.userId, dto);
+    return { data: outline };
+  }
 
   @Post()
   async create(@Body() dto: CreateWritingDTO, @Req() req: RequestWithUser) {
@@ -126,6 +145,43 @@ export class WritingsController {
       req.user.userId,
     );
     return { data: writing };
+  }
+
+  @Get(':id/export/docx')
+  async exportDocx(
+    @Param('id') id: string,
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { buffer, fileName } = await this.exportService.exportWritingDocx(
+      id,
+      req.user.userId,
+    );
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'Content-Disposition': buildAttachmentDisposition(fileName),
+      'Content-Length': buffer.length,
+    });
+    res.send(buffer);
+  }
+
+  @Get(':id/export/pdf')
+  async exportPdf(
+    @Param('id') id: string,
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { buffer, fileName } = await this.exportService.exportWritingPdf(
+      id,
+      req.user.userId,
+    );
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': buildAttachmentDisposition(fileName),
+      'Content-Length': buffer.length,
+    });
+    res.send(buffer);
   }
 
   @Get(':id')

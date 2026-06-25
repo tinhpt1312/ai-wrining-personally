@@ -8,12 +8,16 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import type { RequestWithUser } from 'src/types';
 import { AnalyticsService } from './analytics.service';
+import { ExportService } from './services/export.service';
+import { buildAttachmentDisposition } from 'src/common/utils/content-disposition.util';
 import {
   CreateAnalyticsDTO,
   QueryAnalyticsDTO,
@@ -31,6 +35,7 @@ export class AnalyticsController {
   constructor(
     private readonly analyticsService: AnalyticsService,
     private readonly tokenTrackerService: TokenTrackerService,
+    private readonly exportService: ExportService,
   ) {}
 
   /**
@@ -75,6 +80,15 @@ export class AnalyticsController {
   }
 
   /**
+   * Learning progress for dashboard
+   */
+  @Get('progress')
+  async getProgress(@Req() req: RequestWithUser) {
+    const userId = req.user?.userId;
+    return this.analyticsService.getProgress(userId);
+  }
+
+  /**
    * Get all analyses for the current user
    */
   @Get()
@@ -84,6 +98,51 @@ export class AnalyticsController {
   ) {
     const userId = req.user?.userId;
     return this.analyticsService.findAll(userId, query);
+  }
+
+  /**
+   * Export analysis report as DOCX
+   */
+  @Get(':id/export/docx')
+  async exportDocx(
+    @Param('id') id: string,
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+  ): Promise<void> {
+    const userId = req.user?.userId;
+    const { buffer, fileName } = await this.exportService.exportDocx(
+      id,
+      userId,
+    );
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'Content-Disposition': buildAttachmentDisposition(fileName),
+      'Content-Length': buffer.length,
+    });
+    res.send(buffer);
+  }
+
+  /**
+   * Export analysis report as PDF
+   */
+  @Get(':id/export/pdf')
+  async exportPdf(
+    @Param('id') id: string,
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+  ): Promise<void> {
+    const userId = req.user?.userId;
+    const { buffer, fileName } = await this.exportService.exportPdf(
+      id,
+      userId,
+    );
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': buildAttachmentDisposition(fileName),
+      'Content-Length': buffer.length,
+    });
+    res.send(buffer);
   }
 
   /**
