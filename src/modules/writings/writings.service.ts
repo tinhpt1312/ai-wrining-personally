@@ -6,7 +6,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Writing, Analytics, WritingSuggestion } from 'src/entities';
+import {
+  Writing,
+  Analytics,
+  WritingSuggestion,
+  WritingRevision,
+} from 'src/entities';
 import { CreateWritingDTO, UpdateWritingDTO, QueryWritingDTO } from './dto';
 import { WritingStatusEnum } from './enum';
 
@@ -19,6 +24,8 @@ export class WritingsService {
     private readonly analyticsRepository: Repository<Analytics>,
     @InjectRepository(WritingSuggestion)
     private readonly writingSuggestionRepository: Repository<WritingSuggestion>,
+    @InjectRepository(WritingRevision)
+    private readonly writingRevisionRepository: Repository<WritingRevision>,
   ) {}
 
   /**
@@ -280,6 +287,9 @@ export class WritingsService {
 
     // Delete all related writing suggestions
     await this.writingSuggestionRepository.delete({ writingId: id });
+
+    // Delete all related revisions
+    await this.writingRevisionRepository.delete({ writingId: id });
 
     // Finally delete the writing itself
     await this.writingRepository.delete(id);

@@ -5,9 +5,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WritingSuggestion, Writing } from 'src/entities';
+import { WritingSuggestion, Writing, Analytics } from 'src/entities';
 import { Repository } from 'typeorm';
 import { GeminiProvider } from '../ai/providers/gemini.provider';
+import {
+  buildSuggestionsFromAnalysis,
+  extractAiAnalytics,
+} from './utils/analysis-suggestions.util';
 
 export interface SuggestionDTO {
   type: string;
@@ -33,6 +37,8 @@ export class WritingSuggestionsService {
     private readonly suggestionRepository: Repository<WritingSuggestion>,
     @InjectRepository(Writing)
     private readonly writingRepository: Repository<Writing>,
+    @InjectRepository(Analytics)
+    private readonly analysisRepository: Repository<Analytics>,
     private readonly geminiProvider: GeminiProvider,
   ) {}
 
@@ -132,6 +138,61 @@ export class WritingSuggestionsService {
       this.logger.error(`Failed to generate suggestions:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Build suggestions from an existing AI grading report (no extra AI call).
+   */
+  async generateFromAnalysis(
+    writingId: string,
+    analysisId: string,
+    userId: string,
+  ): Promise<WritingSuggestion[]> {
+    const writing = await this.writingRepository.findOne({
+      where: { id: writingId, userId },
+    });
+
+    if (!writing) {
+      throw new NotFoundException('Writing not found');
+    }
+
+    const analysis = await this.analysisRepository.findOne({
+      where: { id: analysisId, writingId, userId },
+    });
+
+    if (!analysis) {
+      throw new NotFoundException('Analysis not found');
+    }
+
+    const aiAnalytics = extractAiAnalytics(analysis.feedbackJson);
+
+    if (!aiAnalytics) {
+      throw new BadRequestException(
+        'Analysis does not contain structured AI feedback',
+      );
+    }
+
+    const seeds = buildSuggestionsFromAnalysis(aiAnalytics);
+    if (seeds.length === 0) {
+      throw new BadRequestException('No suggestions found in analysis report');
+    }
+
+    await this.suggestionRepository.delete({ writingId });
+
+    const savedSuggestions: WritingSuggestion[] = [];
+    for (const seed of seeds) {
+      const entity = this.suggestionRepository.create({
+        writingId,
+        ...seed,
+      });
+      savedSuggestions.push(await this.suggestionRepository.save(entity));
+    }
+
+    this.logger.log(
+      `Generated ${savedSuggestions.length} suggestions from analysis ${analysisId}`,
+    );
+
+    return savedSuggestions;
   }
 
   /**
@@ -283,7 +344,7 @@ export class WritingSuggestionsService {
   async getHighConfidenceSuggestions(
     writingId: string,
     userId: string,
-    threshold: number = 0.8,
+    threshold = 0.8,
   ): Promise<WritingSuggestion[]> {
     const writing = await this.writingRepository.findOne({
       where: { id: writingId, userId },
@@ -293,12 +354,11 @@ export class WritingSuggestionsService {
       throw new NotFoundException('Writing not found');
     }
 
-    return await this.suggestionRepository.find({
+    const suggestions = await this.suggestionRepository.find({
       where: { writingId },
       order: { confidenceScore: 'DESC' },
     });
 
-    // Filter in code for better control
-    // .filter((s) => s.confidenceScore >= threshold);
+    return suggestions.filter((s) => s.confidenceScore >= threshold);
   }
 }

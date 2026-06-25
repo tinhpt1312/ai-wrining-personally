@@ -5,9 +5,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * gamification (user stats / streaks) and feedback categories.
  * The app now focuses only on writing and AI grading/correction.
  */
-export class DropUnusedFeatureTables1782200000000
-  implements MigrationInterface
-{
+export class DropUnusedFeatureTables1782200000000 implements MigrationInterface {
   name = 'DropUnusedFeatureTables1782200000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

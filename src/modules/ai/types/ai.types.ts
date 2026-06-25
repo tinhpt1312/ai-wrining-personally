@@ -1,3 +1,5 @@
+import type { JsonRecord } from 'src/types';
+
 export enum WritingType {
   SOCIAL_ESSAY = 'BÀI LUẬN XÃ HỘI',
   CATHOLIC_ESSAY = 'BÀI LUẬN CÔNG GIÁO',
@@ -23,7 +25,7 @@ export interface TokenUsageInfo {
 
 export interface AiAnalyticsResult {
   success: boolean;
-  data?: Record<string, any>;
+  data?: JsonRecord;
   tokensUsed?: number;
   error?: AiErrorDetails;
 }

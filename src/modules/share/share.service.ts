@@ -33,7 +33,9 @@ export class ShareService {
     }
 
     if (writing.status !== WritingStatusEnum.PUBLIC) {
-      throw new ForbiddenException('Bài viết chưa được đặt ở trạng thái công khai');
+      throw new ForbiddenException(
+        'Bài viết chưa được đặt ở trạng thái công khai',
+      );
     }
 
     return {
@@ -72,7 +74,9 @@ export class ShareService {
     }
 
     if (writing.status !== WritingStatusEnum.PUBLIC) {
-      throw new ForbiddenException('Bài viết chưa được đặt ở trạng thái công khai');
+      throw new ForbiddenException(
+        'Bài viết chưa được đặt ở trạng thái công khai',
+      );
     }
 
     return {

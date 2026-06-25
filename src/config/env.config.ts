@@ -1,9 +1,15 @@
 import { config } from 'dotenv';
-import { DEFAULT_AI_MODEL, DEFAULT_FALLBACK_MODELS } from 'src/constants/ai.model';
+import {
+  DEFAULT_AI_MODEL,
+  DEFAULT_FALLBACK_MODELS,
+} from 'src/constants/ai.model';
 
 config();
 
-function parseModelList(value: string | undefined, defaults: string[]): string[] {
+function parseModelList(
+  value: string | undefined,
+  defaults: string[],
+): string[] {
   const models = (value ?? defaults.join(','))
     .split(',')
     .map((item) => item.trim())

@@ -11,6 +11,7 @@ import {
 import { User } from './users.entity';
 import { Analytics } from './analysis.entity';
 import { WritingSuggestion } from './writing-suggestion.entity';
+import { WritingRevision } from './writing-revision.entity';
 
 @Entity({ name: 'writings', schema: 'public' })
 export class Writing {
@@ -86,4 +87,10 @@ export class Writing {
     onDelete: 'CASCADE',
   })
   suggestions!: WritingSuggestion[];
+
+  @OneToMany(() => WritingRevision, (revision) => revision.writing, {
+    cascade: ['remove'],
+    onDelete: 'CASCADE',
+  })
+  revisions!: WritingRevision[];
 }

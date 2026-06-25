@@ -95,7 +95,7 @@ export class TokenTrackerService {
   /**
    * Get usage statistics for a user (last 7 days)
    */
-  async getUsageStats(userId: string): Promise<any[]> {
+  async getUsageStats(userId: string): Promise<UserTokenUsage[]> {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 

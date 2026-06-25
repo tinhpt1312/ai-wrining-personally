@@ -13,7 +13,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
         (req) => {
           const cookieName = ENV.JWT.COOKIE_NAME || 'jwt_token';
-          const legacyCookieName = ENV.COOKIE.ACCESS_TOKEN_NAME || 'access_token';
+          const legacyCookieName =
+            ENV.COOKIE.ACCESS_TOKEN_NAME || 'access_token';
           return req?.cookies?.[cookieName] ?? req?.cookies?.[legacyCookieName];
         },
       ]),

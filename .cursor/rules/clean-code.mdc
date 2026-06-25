@@ -38,9 +38,28 @@ if (user.role === 'admin') ...
 - Service: `*.service.ts`; DTO: `*.dto.ts`; entity: `*.entity.ts`.
 - Export named qua barrel khi phù hợp.
 
+## TypeScript — không dùng `any`
+
+- **Cấm** `any` khi có thể định nghĩa type cụ thể.
+- Dùng `unknown` + type guard cho dữ liệu ngoài (JSON parse, lỗi API).
+- Dùng `JsonRecord` (`Record<string, unknown>`) cho metadata JSON linh hoạt (`feedbackJson`, …).
+- Request đã auth: `@Req() req: RequestWithUser` — không `req: any`.
+- ESLint: `@typescript-eslint/no-explicit-any` = `error`.
+
+```typescript
+// ❌ BAD
+function handle(error: any) { ... }
+feedbackJson?: Record<string, any>;
+
+// ✅ GOOD
+function handle(error: unknown) { ... }
+feedbackJson?: JsonRecord;
+@Req() req: RequestWithUser
+```
+
 ## Code quality
 
-- TypeScript strict; không dùng `any` trừ khi bắt buộc và có comment giải thích.
+- TypeScript strict; không dùng `any`.
 - Xử lý lỗi rõ ràng; không swallow exception.
 - Comment chỉ cho logic nghiệp vụ không hiển nhiên.
 - Diff tối thiểu — không refactor ngoài phạm vi task.

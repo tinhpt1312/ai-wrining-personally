@@ -1,4 +1,5 @@
 import { AiErrorDetails } from '../types/ai.types';
+
 export enum AiErrorCode {
   INVALID_RESPONSE = 'INVALID_RESPONSE',
   RATE_LIMITED = 'RATE_LIMITED',
@@ -20,15 +21,42 @@ export class AiError extends Error {
   }
 }
 
+interface ErrorLike {
+  message?: string;
+  code?: string;
+}
+
+function isErrorLike(error: unknown): error is ErrorLike {
+  return typeof error === 'object' && error !== null;
+}
+
+function getErrorMessage(error: unknown): string | undefined {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (isErrorLike(error) && typeof error.message === 'string') {
+    return error.message;
+  }
+  return undefined;
+}
+
+function getErrorCode(error: unknown): string | undefined {
+  if (isErrorLike(error) && typeof error.code === 'string') {
+    return error.code;
+  }
+  return undefined;
+}
+
 export class AiErrorHandler {
-  static handle(error: any): AiErrorDetails {
-    // Handle Gemini SDK errors
-    if (error.message) {
-      // Rate limit error
+  static handle(error: unknown): AiErrorDetails {
+    const message = getErrorMessage(error);
+    const code = getErrorCode(error);
+
+    if (message) {
       if (
-        error.message.includes('RESOURCE_EXHAUSTED') ||
-        error.message.includes('429') ||
-        error.message.includes('quota')
+        message.includes('RESOURCE_EXHAUSTED') ||
+        message.includes('429') ||
+        message.includes('quota')
       ) {
         return {
           code: 'RATE_LIMIT_EXCEEDED',
@@ -39,11 +67,10 @@ export class AiErrorHandler {
         };
       }
 
-      // Auth error
       if (
-        error.message.includes('UNAUTHENTICATED') ||
-        error.message.includes('401') ||
-        error.message.includes('API key')
+        message.includes('UNAUTHENTICATED') ||
+        message.includes('401') ||
+        message.includes('API key')
       ) {
         return {
           code: 'AUTH_ERROR',
@@ -53,8 +80,7 @@ export class AiErrorHandler {
         };
       }
 
-      // Permission error
-      if (error.message.includes('PERMISSION_DENIED')) {
+      if (message.includes('PERMISSION_DENIED')) {
         return {
           code: 'PERMISSION_ERROR',
           message: 'Permission denied. Check API key and project permissions.',
@@ -63,11 +89,10 @@ export class AiErrorHandler {
         };
       }
 
-      // Server error
       if (
-        error.message.includes('INTERNAL') ||
-        error.message.includes('500') ||
-        error.message.includes('503')
+        message.includes('INTERNAL') ||
+        message.includes('500') ||
+        message.includes('503')
       ) {
         return {
           code: 'SERVICE_UNAVAILABLE',
@@ -78,11 +103,7 @@ export class AiErrorHandler {
         };
       }
 
-      // Bad request
-      if (
-        error.message.includes('INVALID_ARGUMENT') ||
-        error.message.includes('400')
-      ) {
+      if (message.includes('INVALID_ARGUMENT') || message.includes('400')) {
         return {
           code: 'INVALID_REQUEST',
           message: 'Invalid request. Check prompt and parameters.',
@@ -91,11 +112,7 @@ export class AiErrorHandler {
         };
       }
 
-      // Content policy error
-      if (
-        error.message.includes('BLOCKED') ||
-        error.message.includes('policy')
-      ) {
+      if (message.includes('BLOCKED') || message.includes('policy')) {
         return {
           code: 'CONTENT_BLOCKED',
           message:
@@ -106,11 +123,10 @@ export class AiErrorHandler {
       }
     }
 
-    // Handle network errors
     if (
-      error.code === 'ECONNREFUSED' ||
-      error.code === 'ENOTFOUND' ||
-      error.message?.includes('ECONNREFUSED')
+      code === 'ECONNREFUSED' ||
+      code === 'ENOTFOUND' ||
+      message?.includes('ECONNREFUSED')
     ) {
       return {
         code: 'NETWORK_ERROR',
@@ -121,8 +137,7 @@ export class AiErrorHandler {
       };
     }
 
-    // Handle timeout errors
-    if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
+    if (code === 'ETIMEDOUT' || message?.includes('timeout')) {
       return {
         code: 'TIMEOUT_ERROR',
         message: 'Request to Gemini API timed out. Please try again.',
@@ -132,10 +147,9 @@ export class AiErrorHandler {
       };
     }
 
-    // Default error
     return {
       code: 'UNKNOWN_ERROR',
-      message: error.message || 'An unexpected error occurred.',
+      message: message || 'An unexpected error occurred.',
       retryable: false,
       statusCode: 500,
     };

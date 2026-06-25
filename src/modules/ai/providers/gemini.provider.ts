@@ -3,7 +3,14 @@ import { GoogleGenAI } from '@google/genai';
 import { ENV } from 'src/config/env.config';
 import { AiError, AiErrorCode } from '../utils/ai-error-handler';
 import { parseSuggestionsPayload } from 'src/shared';
-import type { AiProviderRequest, AiProviderResponse } from './ai-provider.types';
+import type {
+  AiProviderRequest,
+  AiProviderResponse,
+} from './ai-provider.types';
+import {
+  isRawWritingSuggestion,
+  type RawWritingSuggestion,
+} from '../types/suggestion.types';
 
 export type { AiProviderRequest, AiProviderResponse };
 
@@ -17,7 +24,9 @@ export class GeminiProvider {
     this.client = new GoogleGenAI({ apiKey: ENV.GEMINI.API_KEY });
     this.modelChain = [
       ENV.GEMINI.MODEL,
-      ...ENV.GEMINI.FALLBACK_MODELS.filter((model) => model !== ENV.GEMINI.MODEL),
+      ...ENV.GEMINI.FALLBACK_MODELS.filter(
+        (model) => model !== ENV.GEMINI.MODEL,
+      ),
     ];
     this.logger.log(
       `Gemini Interactions API ready — models: ${this.modelChain.join(' → ')}`,
@@ -50,7 +59,9 @@ export class GeminiProvider {
           const notFound = this.parseNotFound(error);
 
           if (notFound) {
-            this.logger.warn(`Model ${model} không khả dụng, chuyển model tiếp theo`);
+            this.logger.warn(
+              `Model ${model} không khả dụng, chuyển model tiếp theo`,
+            );
             break;
           }
 
@@ -172,19 +183,24 @@ Quy tắc:
           throw new Error('Model returned an empty suggestions array');
         }
 
-        return suggestions.map((s: any) => ({
-          type: s.type || 'suggestion',
-          originalText: s.originalText || '',
-          suggestedText: s.suggestedText || '',
-          explanation: s.explanation || '',
-          confidenceScore:
-            typeof s.confidenceScore === 'number' ? s.confidenceScore : 0.7,
-          severity: s.severity || 'suggestion',
-        }));
+        return suggestions
+          .filter(isRawWritingSuggestion)
+          .map((s: RawWritingSuggestion) => ({
+            type: s.type || 'suggestion',
+            originalText: s.originalText || '',
+            suggestedText: s.suggestedText || '',
+            explanation: s.explanation || '',
+            confidenceScore:
+              typeof s.confidenceScore === 'number' ? s.confidenceScore : 0.7,
+            severity: s.severity || 'suggestion',
+          }));
       } catch (error) {
         lastError = error;
 
-        if (error instanceof AiError && error.code === AiErrorCode.RATE_LIMITED) {
+        if (
+          error instanceof AiError &&
+          error.code === AiErrorCode.RATE_LIMITED
+        ) {
           throw error;
         }
 

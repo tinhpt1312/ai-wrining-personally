@@ -6,7 +6,22 @@ import {
   ResponseParserResult,
   WritingAnalytics,
   WritingAnalyticsSchema,
+  type PartialWritingAnalytics,
 } from '../../ai/schemas/analysis-response.schema';
+
+interface RawFeedbackItem {
+  score?: number;
+  feedback?: string;
+  suggestions?: unknown;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function asRawFeedbackItem(value: unknown): RawFeedbackItem | undefined {
+  return isRecord(value) ? value : undefined;
+}
 
 @Injectable()
 export class ResponseParserService {
@@ -30,14 +45,16 @@ export class ResponseParserService {
       }
 
       // Step 2: Parse JSON
-      let parsedData: any;
+      let parsedData: unknown;
       try {
-        parsedData = JSON.parse(jsonContent);
+        parsedData = JSON.parse(jsonContent) as unknown;
       } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Unknown JSON parse error';
         this.logger.error('Failed to parse JSON:', error);
         return {
           valid: false,
-          errors: [`JSON parse error: ${error.message}`],
+          errors: [`JSON parse error: ${message}`],
           rawContent: content,
         };
       }
@@ -67,7 +84,7 @@ export class ResponseParserService {
         this.logger.warn('Partial response validation successful (fallback)');
         return {
           valid: true,
-          data: this.fillPartialData(partialResult.data) as WritingAnalytics,
+          data: this.fillPartialData(partialResult.data),
           errors: this.formatZodErrors(validationResult.error),
           rawContent: content,
         };
@@ -81,10 +98,12 @@ export class ResponseParserService {
         rawContent: content,
       };
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unknown parsing error';
       this.logger.error('Unexpected error during parsing:', error);
       return {
         valid: false,
-        errors: [`Unexpected parsing error: ${error.message}`],
+        errors: [`Unexpected parsing error: ${message}`],
         rawContent: content,
       };
     }
@@ -162,22 +181,24 @@ export class ResponseParserService {
   /**
    * Check if partial data has minimum required fields
    */
-  private hasMinimalData(data: any): boolean {
-    return (
-      data &&
-      typeof data === 'object' &&
-      (data.structure ||
-        data.clarity ||
-        data.tone ||
-        data.coherence ||
-        data.overallFeedback)
+  private hasMinimalData(data: unknown): boolean {
+    if (!isRecord(data)) {
+      return false;
+    }
+
+    return !!(
+      data.structure ||
+      data.clarity ||
+      data.tone ||
+      data.coherence ||
+      data.overallFeedback
     );
   }
 
   /**
    * Fill partial data with defaults
    */
-  private fillPartialData(partial: any): Partial<WritingAnalytics> {
+  private fillPartialData(partial: PartialWritingAnalytics): WritingAnalytics {
     const defaultFeedback = {
       score: 5,
       feedback: 'Đang phân tích chi tiết',
@@ -211,12 +232,12 @@ export class ResponseParserService {
     };
   }
 
-  private normalizeAnalyticsData(data: any): any {
-    if (!data || typeof data !== 'object') {
-      return data;
+  private normalizeAnalyticsData(data: unknown): Record<string, unknown> {
+    if (!isRecord(data)) {
+      return {};
     }
 
-    const normalized = { ...data };
+    const normalized: Record<string, unknown> = { ...data };
 
     normalized.structure = this.normalizeFeedbackItem(
       normalized.structure,
@@ -258,7 +279,9 @@ export class ResponseParserService {
       typeof normalized.sampleWriting === 'string' &&
       normalized.sampleWriting.trim().length >= 100
     ) {
-      normalized.sampleWriting = normalized.sampleWriting.trim().slice(0, 20000);
+      normalized.sampleWriting = normalized.sampleWriting
+        .trim()
+        .slice(0, 20000);
     } else {
       delete normalized.sampleWriting;
     }
@@ -266,18 +289,19 @@ export class ResponseParserService {
     return normalized;
   }
 
-  private normalizeFeedbackItem(item: any, fallbackFeedback: string) {
+  private normalizeFeedbackItem(item: unknown, fallbackFeedback: string) {
+    const raw = asRawFeedbackItem(item);
     const score =
-      typeof item?.score === 'number'
-        ? Math.max(1, Math.min(10, Math.round(item.score)))
+      typeof raw?.score === 'number'
+        ? Math.max(1, Math.min(10, Math.round(raw.score)))
         : 5;
 
     const feedback =
-      typeof item?.feedback === 'string' && item.feedback.trim().length >= 10
-        ? item.feedback.trim().slice(0, 1000)
+      typeof raw?.feedback === 'string' && raw.feedback.trim().length >= 10
+        ? raw.feedback.trim().slice(0, 1000)
         : fallbackFeedback;
 
-    const suggestions = this.normalizeStringList(item?.suggestions, [
+    const suggestions = this.normalizeStringList(raw?.suggestions, [
       'Cải thiện phần này với một gợi ý cụ thể',
     ]).slice(0, 5);
 
@@ -288,7 +312,7 @@ export class ResponseParserService {
     };
   }
 
-  private normalizeStringList(value: any, defaults: string[]): string[] {
+  private normalizeStringList(value: unknown, defaults: string[]): string[] {
     const items = (Array.isArray(value) ? value : [])
       .filter((item) => typeof item === 'string')
       .map((item) => item.trim())
@@ -321,7 +345,7 @@ export class ResponseParserService {
   /**
    * Validate data structure without full parsing
    */
-  validateStructure(data: any): boolean {
+  validateStructure(data: unknown): boolean {
     const result = WritingAnalyticsSchema.safeParse(data);
     return result.success;
   }

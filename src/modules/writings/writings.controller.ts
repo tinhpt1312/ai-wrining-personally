@@ -14,15 +14,25 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Writing } from 'src/entities';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import type { RequestWithUser } from 'src/types';
-import { CreateWritingDTO, QueryWritingDTO, UpdateWritingDTO } from './dto';
+import {
+  CreateWritingDTO,
+  QueryWritingDTO,
+  UpdateWritingDTO,
+  CreateWritingRevisionDTO,
+  EnsureBaselineRevisionDTO,
+} from './dto';
 import { WritingsService } from './writings.service';
+import { WritingRevisionsService } from './writing-revisions.service';
 
 @ApiTags('writings')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('writings')
 export class WritingsController {
-  constructor(private readonly writingsService: WritingsService) {}
+  constructor(
+    private readonly writingsService: WritingsService,
+    private readonly revisionsService: WritingRevisionsService,
+  ) {}
 
   @Post()
   async create(@Body() dto: CreateWritingDTO, @Req() req: RequestWithUser) {
@@ -42,6 +52,80 @@ export class WritingsController {
   @Get()
   async findAll(@Query() query: QueryWritingDTO, @Req() req: RequestWithUser) {
     return this.writingsService.findAll(req.user.userId, query);
+  }
+
+  @Get(':id/revisions/timeline')
+  async getRevisionTimeline(
+    @Param('id') id: string,
+    @Query('analysisId') analysisId: string | undefined,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.revisionsService.findTimeline(
+      id,
+      req.user.userId,
+      analysisId,
+    );
+  }
+
+  @Post(':id/revisions/baseline')
+  async ensureBaselineRevision(
+    @Param('id') id: string,
+    @Body() dto: EnsureBaselineRevisionDTO,
+    @Req() req: RequestWithUser,
+  ) {
+    const revision = await this.revisionsService.ensureGradingBaseline(
+      id,
+      req.user.userId,
+      dto,
+    );
+    return { data: revision };
+  }
+
+  @Get(':id/revisions/:revisionId')
+  async getRevision(
+    @Param('id') id: string,
+    @Param('revisionId') revisionId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    const revision = await this.revisionsService.findOne(
+      id,
+      revisionId,
+      req.user.userId,
+    );
+    return { data: revision };
+  }
+
+  @Get(':id/revisions')
+  async getRevisions(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.revisionsService.findByWriting(id, req.user.userId);
+  }
+
+  @Post(':id/revisions')
+  async createRevision(
+    @Param('id') id: string,
+    @Body() dto: CreateWritingRevisionDTO,
+    @Req() req: RequestWithUser,
+  ) {
+    const revision = await this.revisionsService.create(
+      id,
+      req.user.userId,
+      dto,
+    );
+    return { data: revision };
+  }
+
+  @Post(':id/revisions/:revisionId/restore')
+  async restoreRevision(
+    @Param('id') id: string,
+    @Param('revisionId') revisionId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    const writing = await this.revisionsService.restore(
+      id,
+      revisionId,
+      req.user.userId,
+    );
+    return { data: writing };
   }
 
   @Get(':id')

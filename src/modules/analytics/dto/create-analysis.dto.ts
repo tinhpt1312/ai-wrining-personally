@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsUUID, IsOptional, IsObject } from 'class-validator';
+import type { JsonRecord } from 'src/types';
 
 export class CreateAnalyticsDTO {
   @ApiProperty({
@@ -22,5 +23,5 @@ export class CreateAnalyticsDTO {
   })
   @IsOptional()
   @IsObject({ message: 'Feedback must be an object' })
-  feedbackJson?: Record<string, any>;
+  feedbackJson?: JsonRecord;
 }

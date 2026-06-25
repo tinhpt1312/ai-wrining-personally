@@ -22,6 +22,7 @@ import { ResponseParserService } from './services/response-parser.service';
 import { TokenTrackerService } from './services/token-tracker.service';
 import { TokenEstimator } from '../ai/utils/token-estimator';
 import { AiErrorHandler } from '../ai/utils/ai-error-handler';
+import type { AiErrorDetails } from '../ai/types/ai.types';
 import { WritingType } from '../ai/types/ai.types';
 
 @Injectable()
@@ -80,7 +81,11 @@ export class AnalyticsService {
   async createWithAiAnalytics(
     userId: string,
     dto: CreateAiAnalyticsDTO,
-  ): Promise<{ analysis: Analytics; tokensUsed: number; error?: any }> {
+  ): Promise<{
+    analysis: Analytics;
+    tokensUsed: number;
+    error?: AiErrorDetails;
+  }> {
     if (!userId) {
       throw new BadRequestException('User ID is required');
     }
@@ -171,6 +176,38 @@ export class AnalyticsService {
 
       const parsed = parseResult.data;
 
+      const existingCount = await this.analysisRepository.count({
+        where: { writingId: dto.writingId, userId },
+      });
+
+      let previousScore: number | null = null;
+      if (dto.previousAnalysisId) {
+        const previous = await this.analysisRepository.findOne({
+          where: {
+            id: dto.previousAnalysisId,
+            writingId: dto.writingId,
+            userId,
+          },
+        });
+        if (previous?.feedbackJson) {
+          const prevData =
+            (previous.feedbackJson as Record<string, unknown>).aiAnalytics ??
+            previous.feedbackJson;
+          const scores = ['structure', 'clarity', 'tone', 'coherence']
+            .map(
+              (key) =>
+                (prevData as Record<string, { score?: number }>)[key]?.score,
+            )
+            .filter((s): s is number => typeof s === 'number');
+          if (scores.length > 0) {
+            previousScore =
+              Math.round(
+                (scores.reduce((sum, s) => sum + s, 0) / scores.length) * 10,
+              ) / 10;
+          }
+        }
+      }
+
       // Step 6: Create analysis record with AI feedback
       const analysis = new Analytics();
       analysis.userId = userId;
@@ -181,6 +218,9 @@ export class AnalyticsService {
         validationErrors: parseResult.errors,
         generatedAt: new Date().toISOString(),
         writingType,
+        previousAnalysisId: dto.previousAnalysisId ?? null,
+        revisionNumber: existingCount + 1,
+        previousScore,
       };
 
       const savedAnalytics = await this.analysisRepository.save(analysis);
@@ -460,5 +500,4 @@ export class AnalyticsService {
       count: analyses.length,
     };
   }
-
 }

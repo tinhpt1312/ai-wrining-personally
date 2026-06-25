@@ -75,7 +75,9 @@ export function parseSuggestionsPayload(text: string): unknown[] {
 
   for (const strategy of strategies) {
     try {
-      const result = strategy().filter((item) => item && typeof item === 'object');
+      const result = strategy().filter(
+        (item) => item && typeof item === 'object',
+      );
       if (result.length > 0) {
         return result;
       }

@@ -7,6 +7,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { WritingType } from 'src/modules/ai/types/ai.types';
+import type { JsonRecord } from 'src/types';
 
 /**
  * DTO for creating an analysis with AI generation
@@ -51,5 +52,13 @@ export class CreateAiAnalyticsDTO {
     required: false,
   })
   @IsOptional()
-  feedbackJson?: Record<string, any>;
+  feedbackJson?: JsonRecord;
+
+  @ApiProperty({
+    description: 'Previous analysis ID when re-grading after revision',
+    required: false,
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'Previous analysis ID must be a valid UUID' })
+  previousAnalysisId?: string;
 }
