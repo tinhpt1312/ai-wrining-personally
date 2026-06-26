@@ -25,10 +25,12 @@ import {
   CreateWritingRevisionDTO,
   EnsureBaselineRevisionDTO,
   GenerateOutlineDTO,
+  GenerateWritingPromptsDTO,
 } from './dto';
 import { WritingsService } from './writings.service';
 import { WritingRevisionsService } from './writing-revisions.service';
 import { WritingOutlineService } from './services/writing-outline.service';
+import { WritingPromptService } from './services/writing-prompt.service';
 import { TokenLimitGuard } from '../analytics/guards/token-limit.guard';
 
 @ApiTags('writings')
@@ -41,7 +43,18 @@ export class WritingsController {
     private readonly revisionsService: WritingRevisionsService,
     private readonly exportService: ExportService,
     private readonly outlineService: WritingOutlineService,
+    private readonly promptService: WritingPromptService,
   ) {}
+
+  @Post('prompts/generate')
+  @UseGuards(TokenLimitGuard)
+  async generatePrompts(
+    @Body() dto: GenerateWritingPromptsDTO,
+    @Req() req: RequestWithUser,
+  ) {
+    const prompts = await this.promptService.generate(req.user.userId, dto);
+    return { data: prompts };
+  }
 
   @Post('outline')
   @UseGuards(TokenLimitGuard)

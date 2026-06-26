@@ -238,6 +238,52 @@ export class PromptTemplatesService {
     `;
   }
 
+  /**
+   * Prompt for generating practice writing topics
+   */
+  getWritingPromptsPrompt(
+    type: string,
+    difficulty: string | undefined,
+    count: number,
+    excludeTitles?: string[],
+  ): string {
+    const difficultyBlock = difficulty?.trim()
+      ? `\n**Độ khó yêu cầu:** ${difficulty.trim()}`
+      : '\n**Độ khó:** đa dạng (dễ, trung bình, khó)';
+
+    const excludeBlock =
+      excludeTitles && excludeTitles.length > 0
+        ? `\n**Không lặp lại các đề sau:**\n${excludeTitles.map((title) => `- ${title}`).join('\n')}`
+        : '';
+
+    return `
+      Sinh ${count} đề bài luyện viết văn tiếng Việt cho học sinh/sinh viên.
+
+      **Loại bài:** ${type}
+      ${difficultyBlock}
+      ${excludeBlock}
+
+      Trả về CHỈ một JSON hợp lệ (không markdown):
+      {
+        "prompts": [
+          {
+            "title": "<tiêu đề đề bài ngắn gọn>",
+            "topic": "<chủ đề / mô tả đề>",
+            "hint": "<gợi ý cách triển khai, 1–2 câu>",
+            "difficulty": "dễ" | "trung bình" | "khó"
+          }
+        ]
+      }
+
+      **Yêu cầu:**
+      - Đúng ${count} đề, chủ đề đa dạng, phù hợp lứa tuổi học sinh–sinh viên Việt Nam
+      - title ngắn gọn (dưới 80 ký tự), topic có thể chi tiết hơn title
+      - hint cụ thể, actionable — không viết sẵn bài mẫu
+      - Toàn bộ bằng tiếng Việt
+      - Không trùng với các đề trong danh sách loại trừ (nếu có)
+    `;
+  }
+
   private getOutlineStructureHint(type: string): string {
     switch (type) {
       case WritingType.SOCIAL_ESSAY:
