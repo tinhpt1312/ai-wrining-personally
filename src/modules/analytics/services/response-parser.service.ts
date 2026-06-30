@@ -7,7 +7,7 @@ import {
   WritingAnalytics,
   WritingAnalyticsSchema,
   type PartialWritingAnalytics,
-} from '../../ai/schemas/analysis-response.schema';
+} from '../../../shared/ai/schemas/analysis-response.schema';
 
 interface RawFeedbackItem {
   score?: number;

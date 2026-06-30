@@ -10,15 +10,12 @@ alwaysApply: false
 
 ```
 src/modules/{module}/
-  {module}.module.ts
-  {module}.controller.ts   # HTTP layer only
-  {module}.service.ts      # business logic — 1 module = 1 service chính
-  dto/
-  constants/               # constant riêng module (nếu cần)
+  ...
+src/constants/           # ERROR_CODE, CORS, AI model (config tĩnh)
+src/types/               # enum, interface, type alias (domain + auth)
+src/utils/               # shared helpers
 src/common/
-  constants/               # JWT, roles, shared enums
-  guards/
-  decorators/
+  app.exception.ts       # AppException, throwAppError
 ```
 
 ## Trách nhiệm từng layer
@@ -34,20 +31,27 @@ src/common/
 
 - Mỗi domain một `*.service.ts`: `AuthService`, `WritingsService`, `AiService`.
 - Service **không** import service module khác trừ khi được inject qua module exports.
-- Shared logic → `src/common/` hoặc base class, không copy-paste.
+- Shared logic → `src/utils/` hoặc `src/constants/`; exceptions → `src/common/app.exception.ts`.
 
 ## Constants tập trung
 
 ```typescript
-// ✅ src/common/constants/roles.constants.ts
-export const USER_ROLES = { USER: 'user', ADMIN: 'admin' } as const;
+// ✅ src/constants/error-codes.constants.ts
+export const ERROR_CODE = { INVALID_CREDENTIALS: 'INVALID_CREDENTIALS' } as const;
 
-// ✅ src/modules/ai/constants/prompt.constants.ts
-export const AI_PROMPT_LIMITS = { MAX_TOKENS: 4096 } as const;
+// ✅ src/constants/error-messages.constants.ts — English only
+export const ERROR_MESSAGES = { [ERROR_CODE.INVALID_CREDENTIALS]: 'Invalid username or password' };
 
-// ❌ BAD — magic string trong service
-if (user.role === 'admin') ...
+// ✅ Throw errors
+import { throwAppError } from 'src/common/app.exception';
+import { ERROR_CODE } from 'src/constants';
+throwAppError(ERROR_CODE.INVALID_CREDENTIALS);
+
+// ❌ BAD — magic string / Vietnamese API error
+throw new UnauthorizedException('Mật khẩu không đúng');
 ```
+
+Xem thêm rule `error-codes.mdc`.
 
 ## DTO & validation
 

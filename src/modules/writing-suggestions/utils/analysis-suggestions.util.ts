@@ -1,4 +1,4 @@
-import type { WritingAnalytics } from '../../ai/schemas/analysis-response.schema';
+import type { WritingAnalytics } from '../../../shared/ai/schemas/analysis-response.schema';
 
 const CRITERION_TYPE_MAP: Record<string, string> = {
   structure: 'STYLE',

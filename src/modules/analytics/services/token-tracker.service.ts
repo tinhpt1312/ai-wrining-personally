@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserTokenUsage } from '../../../entities/user-token-usage.entity';
 import { ENV } from '../../../config/env.config';
-import { TokenUsageInfo } from '../../ai/types/ai.types';
+import { TokenUsageInfo } from '../../../types/ai.type';
 
 @Injectable()
 export class TokenTrackerService {

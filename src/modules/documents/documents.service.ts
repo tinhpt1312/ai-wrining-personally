@@ -1,9 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnsupportedMediaTypeException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as mammoth from 'mammoth';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_EXTENSIONS = ['.docx'];
@@ -22,23 +20,19 @@ export interface ParsedDocument {
 export class DocumentsService {
   async parseDocx(file: Express.Multer.File): Promise<ParsedDocument> {
     if (!file) {
-      throw new BadRequestException('Vui lòng chọn file để tải lên');
+      throwAppError(ERROR_CODE.FILE_REQUIRED);
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      throw new BadRequestException('File quá lớn. Kích thước tối đa là 5MB');
+      throwAppError(ERROR_CODE.FILE_TOO_LARGE);
     }
 
     const extension = this.getExtension(file.originalname);
     if (!ALLOWED_EXTENSIONS.includes(extension)) {
       if (extension === '.doc') {
-        throw new UnsupportedMediaTypeException(
-          'File .doc (Word cũ) chưa được hỗ trợ. Vui lòng lưu file dưới định dạng .docx',
-        );
+        throwAppError(ERROR_CODE.DOC_LEGACY_NOT_SUPPORTED);
       }
-      throw new UnsupportedMediaTypeException(
-        'Chỉ hỗ trợ file .docx. Vui lòng tải lên file Word (.docx)',
-      );
+      throwAppError(ERROR_CODE.FILE_TYPE_DOCX_ONLY);
     }
 
     if (
@@ -46,18 +40,14 @@ export class DocumentsService {
       !ALLOWED_MIME_TYPES.includes(file.mimetype) &&
       file.mimetype !== 'application/zip'
     ) {
-      throw new UnsupportedMediaTypeException(
-        'Định dạng file không hợp lệ. Vui lòng tải lên file .docx',
-      );
+      throwAppError(ERROR_CODE.FILE_INVALID_MIME);
     }
 
     const result = await mammoth.extractRawText({ buffer: file.buffer });
     const content = result.value.trim();
 
     if (!content || content.length < 10) {
-      throw new BadRequestException(
-        'Không đọc được nội dung từ file. File có thể trống hoặc bị lỗi.',
-      );
+      throwAppError(ERROR_CODE.FILE_EMPTY_OR_CORRUPT);
     }
 
     const title = this.extractTitle(file.originalname, content);

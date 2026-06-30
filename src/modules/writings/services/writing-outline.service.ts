@@ -1,12 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
-import { GeminiProvider } from 'src/modules/ai/providers/gemini.provider';
-import { PromptTemplatesService } from 'src/modules/ai/services/prompt-templates.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
+import { GeminiProvider } from 'src/shared/ai/providers/gemini.provider';
+import { PromptTemplatesService } from 'src/shared/ai/services/prompt-templates.service';
 import { TokenTrackerService } from 'src/modules/analytics/services/token-tracker.service';
-import { extractJson } from 'src/shared';
+import { extractJson } from 'src/utils/parse-json.helper';
 import { GenerateOutlineDTO } from '../dto/generate-outline.dto';
 
 export interface WritingOutlineSection {
@@ -33,7 +31,7 @@ export class WritingOutlineService {
 
   async generate(userId: string, dto: GenerateOutlineDTO): Promise<WritingOutline> {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const prompt = this.promptTemplates.getOutlinePrompt(
@@ -120,9 +118,7 @@ export class WritingOutlineService {
       };
     } catch (error) {
       this.logger.warn('Failed to parse outline JSON', error);
-      throw new BadRequestException(
-        'Không thể tạo dàn ý. Vui lòng thử lại sau.',
-      );
+      throwAppError(ERROR_CODE.OUTLINE_GENERATION_FAILED);
     }
   }
 }

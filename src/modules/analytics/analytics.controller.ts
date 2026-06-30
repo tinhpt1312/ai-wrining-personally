@@ -17,7 +17,7 @@ import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import type { RequestWithUser } from 'src/types';
 import { AnalyticsService } from './analytics.service';
 import { ExportService } from './services/export.service';
-import { buildAttachmentDisposition } from 'src/common/utils/content-disposition.util';
+import { buildAttachmentDisposition } from 'src/utils/content-disposition.util';
 import {
   CreateAnalyticsDTO,
   QueryAnalyticsDTO,

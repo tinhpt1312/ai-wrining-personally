@@ -1,11 +1,8 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
 import {
   Writing,
   Analytics,
@@ -34,13 +31,11 @@ export class WritingsService {
    */
   async create(userId: string, dto: CreateWritingDTO) {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     if (!isActiveWritingType(dto.type)) {
-      throw new BadRequestException(
-        'Loại bài hiện chỉ hỗ trợ: BÀI LUẬN XÃ HỘI, BÀI LUẬN CÔNG GIÁO',
-      );
+      throwAppError(ERROR_CODE.WRITING_TYPE_NOT_SUPPORTED);
     }
 
     const writing = this.writingRepository.create({
@@ -60,7 +55,7 @@ export class WritingsService {
    */
   async findAll(userId: string, query: QueryWritingDTO) {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const { limit = 10, offset = 0, type, status, search } = query;
@@ -179,11 +174,11 @@ export class WritingsService {
    */
   async findOne(id: string, userId: string): Promise<Writing> {
     if (!id) {
-      throw new BadRequestException('Writing ID is required');
+      throwAppError(ERROR_CODE.WRITING_ID_REQUIRED);
     }
 
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const writing = await this.writingRepository.findOne({
@@ -192,14 +187,14 @@ export class WritingsService {
     });
 
     if (!writing) {
-      throw new NotFoundException(`Writing with ID ${id} not found`);
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     if (
       writing.userId !== userId &&
       writing.status !== WritingStatusEnum.PUBLIC
     ) {
-      throw new ForbiddenException('Bạn không có quyền xem bài viết này');
+      throwAppError(ERROR_CODE.WRITING_ACCESS_DENIED);
     }
 
     if (writing.user) {
@@ -224,9 +219,7 @@ export class WritingsService {
     });
 
     if (!writing) {
-      throw new NotFoundException(
-        `Writing with ID ${id} not found or you do not have access to it`,
-      );
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     return writing;
@@ -258,19 +251,17 @@ export class WritingsService {
     dto: UpdateWritingDTO,
   ): Promise<Writing> {
     if (!id) {
-      throw new BadRequestException('Writing ID is required');
+      throwAppError(ERROR_CODE.WRITING_ID_REQUIRED);
     }
 
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const writing = await this.findOneForOwner(id, userId);
 
     if (dto.type !== undefined && !isActiveWritingType(dto.type)) {
-      throw new BadRequestException(
-        'Loại bài hiện chỉ hỗ trợ: BÀI LUẬN XÃ HỘI, BÀI LUẬN CÔNG GIÁO',
-      );
+      throwAppError(ERROR_CODE.WRITING_TYPE_NOT_SUPPORTED);
     }
 
     const updatedWriting = this.writingRepository.merge(writing, {
@@ -290,11 +281,11 @@ export class WritingsService {
    */
   async remove(id: string, userId: string): Promise<{ message: string }> {
     if (!id) {
-      throw new BadRequestException('Writing ID is required');
+      throwAppError(ERROR_CODE.WRITING_ID_REQUIRED);
     }
 
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     await this.findOneForOwner(id, userId);
@@ -318,7 +309,7 @@ export class WritingsService {
    */
   async getStats(userId: string) {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const totalCount = await this.writingRepository.count({

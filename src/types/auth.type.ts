@@ -1,5 +1,11 @@
 import { Request } from 'express';
-import { Role } from 'src/common/enums/role.enum';
+
+export enum Role {
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
+export const ALL_ROLES = Object.values(Role);
 
 export interface JwtPayload {
   sub: string;

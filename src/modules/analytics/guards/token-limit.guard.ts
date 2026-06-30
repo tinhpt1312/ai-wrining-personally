@@ -1,11 +1,12 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
-  HttpException,
   HttpStatus,
+  Injectable,
   Logger,
 } from '@nestjs/common';
+import { ERROR_CODE } from 'src/constants';
+import { AppException, throwAppError } from 'src/common/app.exception';
 import { TokenTrackerService } from '../services/token-tracker.service';
 import { RequestWithUser } from '../../../types/auth.type';
 
@@ -21,7 +22,7 @@ export class TokenLimitGuard implements CanActivate {
 
     if (!userId) {
       this.logger.warn('Token limit guard: No user ID in request');
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      throwAppError(ERROR_CODE.ACCESS_DENIED, HttpStatus.UNAUTHORIZED);
     }
 
     try {
@@ -33,32 +34,25 @@ export class TokenLimitGuard implements CanActivate {
           `Token limit exceeded for user ${userId}. Used: ${usage.used}/${usage.limit}`,
         );
 
-        throw new HttpException(
-          {
-            message: 'Daily token limit exceeded',
-            data: {
-              tokensUsed: usage.used,
-              tokensLimit: usage.limit,
-              remaining: usage.remaining,
-            },
+        throwAppError(ERROR_CODE.TOKEN_LIMIT_EXCEEDED, HttpStatus.TOO_MANY_REQUESTS, {
+          data: {
+            tokensUsed: usage.used,
+            tokensLimit: usage.limit,
+            remaining: usage.remaining,
           },
-          HttpStatus.TOO_MANY_REQUESTS,
-        );
+        });
       }
 
       request['tokenUsageInfo'] = usage;
 
       return true;
     } catch (error) {
-      if (error instanceof HttpException) {
+      if (error instanceof AppException) {
         throw error;
       }
 
       this.logger.error('Token limit guard error:', error);
-      throw new HttpException(
-        'Failed to check token limit',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throwAppError(ERROR_CODE.TOKEN_LIMIT_CHECK_FAILED);
     }
   }
 }

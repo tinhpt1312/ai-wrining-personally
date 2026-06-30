@@ -1,19 +1,16 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Response } from 'express';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
 import { ENV } from 'src/config';
 import { User } from 'src/entities';
 import { Repository } from 'typeorm';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
-import { Role } from 'src/common/enums/role.enum';
+import { Role } from 'src/types/auth.type';
 import { JwtPayload } from 'src/types/auth.type';
 
 @Injectable()
@@ -34,9 +31,9 @@ export class AuthService {
 
     if (existingUser) {
       if (existingUser.username === username) {
-        throw new ConflictException('Tên đăng nhập đã tồn tại');
+        throwAppError(ERROR_CODE.USERNAME_EXISTS);
       }
-      throw new ConflictException('Email đã được sử dụng');
+      throwAppError(ERROR_CODE.EMAIL_ALREADY_USED);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -57,11 +54,11 @@ export class AuthService {
     const normalized = email?.trim();
 
     if (!normalized) {
-      throw new BadRequestException('Vui lòng nhập email');
+      throwAppError(ERROR_CODE.EMAIL_REQUIRED);
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
-      throw new BadRequestException('Email không hợp lệ');
+      throwAppError(ERROR_CODE.EMAIL_INVALID);
     }
 
     return normalized;
@@ -69,11 +66,11 @@ export class AuthService {
 
   private validatePassword(password?: string): void {
     if (!password) {
-      throw new BadRequestException('Vui lòng nhập mật khẩu');
+      throwAppError(ERROR_CODE.PASSWORD_REQUIRED);
     }
 
     if (password.length < 6) {
-      throw new BadRequestException('Mật khẩu phải có ít nhất 6 ký tự');
+      throwAppError(ERROR_CODE.PASSWORD_TOO_SHORT);
     }
   }
 
@@ -85,17 +82,17 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không đúng');
+      throwAppError(ERROR_CODE.INVALID_CREDENTIALS);
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('Tài khoản đã bị vô hiệu hóa');
+      throwAppError(ERROR_CODE.ACCOUNT_DEACTIVATED);
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password || '');
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không đúng');
+      throwAppError(ERROR_CODE.INVALID_CREDENTIALS);
     }
 
     const payload: JwtPayload = {

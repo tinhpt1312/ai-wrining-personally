@@ -16,7 +16,7 @@ import type { Response } from 'express';
 import { Writing } from 'src/entities';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { ExportService } from 'src/modules/analytics/services/export.service';
-import { buildAttachmentDisposition } from 'src/common/utils/content-disposition.util';
+import { buildAttachmentDisposition } from 'src/utils/content-disposition.util';
 import type { RequestWithUser } from 'src/types';
 import {
   CreateWritingDTO,

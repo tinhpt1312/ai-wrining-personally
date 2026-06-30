@@ -1,10 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
 import { Writing, WritingRevision } from 'src/entities';
 import { CreateWritingRevisionDTO, EnsureBaselineRevisionDTO } from './dto';
 import { countWords } from './utils/revision.utils';
@@ -75,7 +73,7 @@ export class WritingRevisionsService {
     });
 
     if (!revision) {
-      throw new NotFoundException('Revision not found');
+      throwAppError(ERROR_CODE.REVISION_NOT_FOUND);
     }
 
     return revision;
@@ -145,7 +143,7 @@ export class WritingRevisionsService {
     });
 
     if (!revision) {
-      throw new NotFoundException('Revision not found');
+      throwAppError(ERROR_CODE.REVISION_NOT_FOUND);
     }
 
     writing.content = revision.content;
@@ -156,8 +154,12 @@ export class WritingRevisionsService {
     writingId: string,
     userId: string,
   ): Promise<Writing> {
-    if (!writingId || !userId) {
-      throw new BadRequestException('Writing ID and user ID are required');
+    if (!writingId) {
+      throwAppError(ERROR_CODE.WRITING_ID_REQUIRED);
+    }
+
+    if (!userId) {
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const writing = await this.writingRepository.findOne({
@@ -165,7 +167,7 @@ export class WritingRevisionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     return writing;

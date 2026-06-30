@@ -7,7 +7,7 @@ import {
   WritingSuggestion,
 } from 'src/entities';
 import { AnalyticsModule } from '../analytics/analytics.module';
-import { AiModule } from '../ai/ai.module';
+import { AiModule } from '../../shared/ai/ai.module';
 import { WritingsService } from './writings.service';
 import { WritingRevisionsService } from './writing-revisions.service';
 import { WritingOutlineService } from './services/writing-outline.service';

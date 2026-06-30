@@ -1,12 +1,8 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
+import { ERROR_CODE, SUCCESS_MESSAGES } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
 import { User, Writing } from 'src/entities';
 import { Repository } from 'typeorm';
 import { WritingStatusEnum } from '../writings/enum';
@@ -33,7 +29,7 @@ export class UsersService {
         where: { username: dto.username },
       });
       if (existing) {
-        throw new ConflictException('Tên đăng nhập đã tồn tại');
+        throwAppError(ERROR_CODE.USERNAME_EXISTS);
       }
       user.username = dto.username;
     }
@@ -44,7 +40,7 @@ export class UsersService {
         where: { email: normalizedEmail },
       });
       if (existing) {
-        throw new ConflictException('Email đã được sử dụng');
+        throwAppError(ERROR_CODE.EMAIL_ALREADY_USED);
       }
       user.email = normalizedEmail;
     }
@@ -64,18 +60,18 @@ export class UsersService {
     });
 
     if (!user?.password) {
-      throw new BadRequestException('Không thể đổi mật khẩu');
+      throwAppError(ERROR_CODE.CANNOT_CHANGE_PASSWORD);
     }
 
     const isValid = await bcrypt.compare(dto.currentPassword, user.password);
     if (!isValid) {
-      throw new UnauthorizedException('Mật khẩu hiện tại không đúng');
+      throwAppError(ERROR_CODE.CURRENT_PASSWORD_WRONG);
     }
 
     user.password = await bcrypt.hash(dto.newPassword, 10);
     await this.userRepository.save(user);
 
-    return { message: 'Đổi mật khẩu thành công' };
+    return { message: SUCCESS_MESSAGES.passwordChanged };
   }
 
   async getPublicProfile(username: string) {
@@ -90,7 +86,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('Không tìm thấy người dùng');
+      throwAppError(ERROR_CODE.USER_NOT_FOUND);
     }
 
     const publicWritingsCount = await this.writingRepository.count({
@@ -114,7 +110,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('Không tìm thấy người dùng');
+      throwAppError(ERROR_CODE.USER_NOT_FOUND);
     }
 
     return user;

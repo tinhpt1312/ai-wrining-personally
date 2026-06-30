@@ -1,13 +1,10 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-  Logger,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ERROR_CODE } from 'src/constants';
+import {
+  AppException,
+  throwAppError,
+} from 'src/common/app.exception';
 import { Analytics, Writing } from 'src/entities';
 import { Repository } from 'typeorm';
 import {
@@ -16,14 +13,14 @@ import {
   UpdateAnalyticsDTO,
   CreateAiAnalyticsDTO,
 } from './dto';
-import { GeminiProvider } from '../ai/providers/gemini.provider';
-import { PromptTemplatesService } from '../ai/services/prompt-templates.service';
+import { GeminiProvider } from '../../shared/ai/providers/gemini.provider';
+import { PromptTemplatesService } from '../../shared/ai/services/prompt-templates.service';
 import { ResponseParserService } from './services/response-parser.service';
 import { TokenTrackerService } from './services/token-tracker.service';
-import { TokenEstimator } from '../ai/utils/token-estimator';
-import { AiErrorHandler } from '../ai/utils/ai-error-handler';
-import type { AiErrorDetails } from '../ai/types/ai.types';
-import { WritingType } from '../ai/types/ai.types';
+import { TokenEstimator } from '../../utils/token-estimator';
+import { AiErrorHandler } from '../../utils/ai-error-handler';
+import type { AiErrorDetails } from '../../types/ai.type';
+import { WritingType } from '../../types/ai.type';
 import {
   computeCriterionAverages,
   computeWritingStreak,
@@ -51,11 +48,11 @@ export class AnalyticsService {
    */
   async create(userId: string, dto: CreateAnalyticsDTO): Promise<Analytics> {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     if (!dto.writingId) {
-      throw new BadRequestException('Writing ID is required');
+      throwAppError(ERROR_CODE.WRITING_ID_REQUIRED);
     }
 
     // Verify writing exists and belongs to the user
@@ -67,9 +64,7 @@ export class AnalyticsService {
     });
 
     if (!writing) {
-      throw new NotFoundException(
-        `Writing with ID ${dto.writingId} not found or you do not have access to it`,
-      );
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     const analysis = new Analytics();
@@ -93,11 +88,11 @@ export class AnalyticsService {
     error?: AiErrorDetails;
   }> {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     if (!dto.writingId) {
-      throw new BadRequestException('Writing ID is required');
+      throwAppError(ERROR_CODE.WRITING_ID_REQUIRED);
     }
 
     // Verify writing exists and belongs to the user
@@ -109,9 +104,7 @@ export class AnalyticsService {
     });
 
     if (!writing) {
-      throw new NotFoundException(
-        `Writing with ID ${dto.writingId} not found or you do not have access to it`,
-      );
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     try {
@@ -138,18 +131,7 @@ export class AnalyticsService {
         estimatedTokens,
       );
       if (!hasBudget) {
-        const usage = await this.tokenTrackerService.getCurrentDayUsage(userId);
-        throw new HttpException(
-          {
-            message: 'Daily token limit exceeded',
-            data: {
-              tokensUsed: usage.used,
-              tokensLimit: usage.limit,
-              remaining: usage.remaining,
-            },
-          },
-          HttpStatus.TOO_MANY_REQUESTS,
-        );
+        throwAppError(ERROR_CODE.TOKEN_LIMIT_EXCEEDED);
       }
 
       // Step 4: Call Gemini API
@@ -170,14 +152,7 @@ export class AnalyticsService {
           `AI response validation failed for writing ${writing.id}: ${errors.join(', ')}`,
         );
 
-        throw new HttpException(
-          {
-            message: 'AI analysis generation failed due to invalid AI response',
-            errors,
-            rawContent: parseResult.rawContent,
-          },
-          HttpStatus.BAD_REQUEST,
-        );
+        throwAppError(ERROR_CODE.AI_INVALID_RESPONSE);
       }
 
       const parsed = parseResult.data;
@@ -247,28 +222,17 @@ export class AnalyticsService {
         tokensUsed: aiResponse.totalTokens,
       };
     } catch (error) {
-      if (error instanceof HttpException) {
+      if (error instanceof AppException) {
         throw error;
       }
 
       // Handle Gemini errors
       const errorDetails = AiErrorHandler.handle(error);
-      const httpStatus =
-        errorDetails.statusCode === 429
-          ? HttpStatus.TOO_MANY_REQUESTS
-          : errorDetails.statusCode && errorDetails.statusCode >= 500
-            ? HttpStatus.SERVICE_UNAVAILABLE
-            : HttpStatus.BAD_REQUEST;
-
-      throw new HttpException(
-        {
-          message: 'AI analysis generation failed',
-          error: errorDetails,
-          retryable: errorDetails.retryable,
-          retryAfter: errorDetails.retryAfter,
-        },
-        httpStatus,
+      this.logger.error(
+        `AI analysis generation failed for writing ${dto.writingId}: ${errorDetails.message}`,
       );
+
+      throwAppError(ERROR_CODE.AI_ANALYSIS_FAILED);
     }
   }
 
@@ -291,7 +255,7 @@ export class AnalyticsService {
    */
   async findAll(userId: string, query: QueryAnalyticsDTO) {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const { limit = 10, offset = 0, writingId } = query;
@@ -325,11 +289,11 @@ export class AnalyticsService {
    */
   async findOne(id: string, userId: string): Promise<Analytics> {
     if (!id) {
-      throw new BadRequestException('Analytics ID is required');
+      throwAppError(ERROR_CODE.ANALYTICS_ID_REQUIRED);
     }
 
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const analysis = await this.analysisRepository.findOne({
@@ -344,9 +308,7 @@ export class AnalyticsService {
     });
 
     if (!analysis) {
-      throw new NotFoundException(
-        `Analytics with ID ${id} not found or you do not have access to it`,
-      );
+      throwAppError(ERROR_CODE.ANALYTICS_NOT_FOUND);
     }
 
     return analysis;
@@ -357,11 +319,11 @@ export class AnalyticsService {
    */
   async findByWritingId(writingId: string, userId: string) {
     if (!writingId) {
-      throw new BadRequestException('Writing ID is required');
+      throwAppError(ERROR_CODE.WRITING_ID_REQUIRED);
     }
 
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     // Verify writing exists and belongs to the user
@@ -373,9 +335,7 @@ export class AnalyticsService {
     });
 
     if (!writing) {
-      throw new NotFoundException(
-        `Writing with ID ${writingId} not found or you do not have access to it`,
-      );
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     const analyses = await this.analysisRepository.find({
@@ -403,19 +363,17 @@ export class AnalyticsService {
     dto: UpdateAnalyticsDTO,
   ): Promise<Analytics> {
     if (!id) {
-      throw new BadRequestException('Analytics ID is required');
+      throwAppError(ERROR_CODE.ANALYTICS_ID_REQUIRED);
     }
 
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const analysis = await this.findOne(id, userId);
 
     if (analysis.userId !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to update this analysis',
-      );
+      throwAppError(ERROR_CODE.ANALYTICS_ACCESS_DENIED);
     }
 
     const updatedAnalytics = this.analysisRepository.merge(analysis, {
@@ -433,19 +391,17 @@ export class AnalyticsService {
    */
   async remove(id: string, userId: string): Promise<{ message: string }> {
     if (!id) {
-      throw new BadRequestException('Analytics ID is required');
+      throwAppError(ERROR_CODE.ANALYTICS_ID_REQUIRED);
     }
 
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const analysis = await this.findOne(id, userId);
 
     if (analysis.userId !== userId) {
-      throw new ForbiddenException(
-        'You do not have permission to delete this analysis',
-      );
+      throwAppError(ERROR_CODE.ANALYTICS_ACCESS_DENIED);
     }
 
     await this.analysisRepository.remove(analysis);
@@ -460,7 +416,7 @@ export class AnalyticsService {
    */
   async getStats(userId: string) {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const totalAnalyses = await this.analysisRepository.count({
@@ -486,7 +442,7 @@ export class AnalyticsService {
    */
   async getProgress(userId: string) {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const analyses = await this.analysisRepository.find({
@@ -558,11 +514,11 @@ export class AnalyticsService {
    */
   async findByWritingIds(writingIds: string[], userId: string) {
     if (!writingIds || writingIds.length === 0) {
-      throw new BadRequestException('Writing IDs are required');
+      throwAppError(ERROR_CODE.WRITING_IDS_REQUIRED);
     }
 
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const analyses = await this.analysisRepository

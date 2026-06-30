@@ -1,13 +1,10 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
 import { WritingSuggestion, Writing, Analytics } from 'src/entities';
 import { Repository } from 'typeorm';
-import { GeminiProvider } from '../ai/providers/gemini.provider';
+import { GeminiProvider } from '../../shared/ai/providers/gemini.provider';
 import {
   buildSuggestionsFromAnalysis,
   extractAiAnalytics,
@@ -54,7 +51,7 @@ export class WritingSuggestionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     return await this.suggestionRepository.find({
@@ -76,7 +73,7 @@ export class WritingSuggestionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     return await this.suggestionRepository.find({
@@ -98,7 +95,7 @@ export class WritingSuggestionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     // Delete old suggestions
@@ -153,7 +150,7 @@ export class WritingSuggestionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     const analysis = await this.analysisRepository.findOne({
@@ -161,20 +158,18 @@ export class WritingSuggestionsService {
     });
 
     if (!analysis) {
-      throw new NotFoundException('Analysis not found');
+      throwAppError(ERROR_CODE.ANALYSIS_NOT_FOUND);
     }
 
     const aiAnalytics = extractAiAnalytics(analysis.feedbackJson);
 
     if (!aiAnalytics) {
-      throw new BadRequestException(
-        'Analysis does not contain structured AI feedback',
-      );
+      throwAppError(ERROR_CODE.AI_INVALID_RESPONSE);
     }
 
     const seeds = buildSuggestionsFromAnalysis(aiAnalytics);
     if (seeds.length === 0) {
-      throw new BadRequestException('No suggestions found in analysis report');
+      throwAppError(ERROR_CODE.NO_SUGGESTIONS_IN_REPORT);
     }
 
     await this.suggestionRepository.delete({ writingId });
@@ -209,7 +204,7 @@ export class WritingSuggestionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     const suggestion = await this.suggestionRepository.findOne({
@@ -217,7 +212,7 @@ export class WritingSuggestionsService {
     });
 
     if (!suggestion) {
-      throw new NotFoundException('Suggestion not found');
+      throwAppError(ERROR_CODE.SUGGESTION_NOT_FOUND);
     }
 
     suggestion.isApplied = true;
@@ -262,7 +257,7 @@ export class WritingSuggestionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     const suggestions = await this.suggestionRepository.find({
@@ -309,7 +304,7 @@ export class WritingSuggestionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     const appliedSuggestions = await this.suggestionRepository.find({
@@ -351,7 +346,7 @@ export class WritingSuggestionsService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Writing not found');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     const suggestions = await this.suggestionRepository.find({

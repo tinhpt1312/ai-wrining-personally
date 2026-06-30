@@ -10,8 +10,14 @@ function isLocalDatabase(host?: string): boolean {
   return !host || host === 'localhost' || host === '127.0.0.1';
 }
 
+function shouldUseSsl(host?: string): boolean {
+  if (process.env.DB_SSL === 'true') return true;
+  if (process.env.DB_SSL === 'false') return false;
+  return !isLocalDatabase(host);
+}
+
 function buildSharedDatabaseOptions(): DataSourceOptions {
-  const useSsl = !isLocalDatabase(ENV.DATABASE.HOST);
+  const useSsl = shouldUseSsl(ENV.DATABASE.HOST);
   const isProduction = process.env.NODE_ENV === 'production';
 
   return {

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Analytics, User, Writing } from 'src/entities';
 import { Repository } from 'typeorm';
-import { Role } from 'src/common/enums/role.enum';
+import { Role } from 'src/types/auth.type';
 
 @Injectable()
 export class AdminService {

@@ -1,8 +1,6 @@
 ---
-description: Quy chuẩn clean code cho ai-writing-personally
 alwaysApply: true
 ---
-
 # Clean Code — Backend (ai-writing-personally)
 
 NestJS API. Mọi code mới phải tuân thủ các nguyên tắc sau.
@@ -17,16 +15,16 @@ NestJS API. Mọi code mới phải tuân thủ các nguyên tắc sau.
 
 - Mỗi feature/domain = một module độc lập (auth, writings, analysis, …).
 - **Không** import chéo logic giữa module; dùng public API (export) hoặc shared layer.
-- Shared code đặt ở `src/common/`.
+- Shared code: `src/constants/`, `src/utils/`, exceptions → `src/common/app.exception.ts`.
 
 ## Constants tập trung
 
 - **Không** hard-code string/number lặp lại (route, role, limit, cookie name, …).
-- `constants/` trong module hoặc `src/common/constants/` cho dùng chung.
+- `constants/` trong module hoặc `src/constants/` cho dùng chung app-wide.
 
 ```typescript
-// ✅ GOOD — src/common/constants/roles.constants.ts
-export const USER_ROLES = { USER: 'user', ADMIN: 'admin' } as const;
+// ✅ GOOD — src/types/auth.type.ts
+export enum Role { USER = 'user', ADMIN = 'admin' }
 
 // ❌ BAD — magic string trong service
 if (user.role === 'admin') ...

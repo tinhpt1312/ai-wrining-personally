@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { WritingSuggestion, Writing, Analytics } from 'src/entities';
 import { WritingSuggestionsService } from './writing-suggestions.service';
 import { WritingSuggestionsController } from './writing-suggestions.controller';
-import { AiModule } from '../ai/ai.module';
+import { AiModule } from '../../shared/ai/ai.module';
 
 @Module({
   imports: [

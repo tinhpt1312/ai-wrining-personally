@@ -1,11 +1,8 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
 import {
   Document,
   Packer,
@@ -32,8 +29,8 @@ pdfmake.addFonts(pdfFonts);
 import { Analytics, Writing } from 'src/entities';
 import { WritingStatusEnum } from '../../writings/enum';
 import { extractAiAnalytics } from '../../writing-suggestions/utils/analysis-suggestions.util';
-import type { WritingAnalytics } from '../../ai/schemas/analysis-response.schema';
-import type { FeedbackItem } from '../../ai/schemas/analysis-response.schema';
+import type { WritingAnalytics } from '../../../shared/ai/schemas/analysis-response.schema';
+import type { FeedbackItem } from '../../../shared/ai/schemas/analysis-response.schema';
 
 const CRITERIA_LABELS: Record<string, string> = {
   structure: 'Bố cục & Tổ chức',
@@ -156,14 +153,12 @@ export class ExportService {
     });
 
     if (!analysis) {
-      throw new NotFoundException('Không tìm thấy kết quả chấm bài');
+      throwAppError(ERROR_CODE.ANALYTICS_NOT_FOUND);
     }
 
     const feedback = extractAiAnalytics(analysis.feedbackJson);
     if (!feedback) {
-      throw new BadRequestException(
-        'Kết quả chấm bài không có dữ liệu để xuất. Hãy chấm lại bằng AI.',
-      );
+      throwAppError(ERROR_CODE.ANALYTICS_EXPORT_NO_DATA);
     }
 
     const writing = await this.writingRepository.findOne({
@@ -171,7 +166,7 @@ export class ExportService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Không tìm thấy bài viết');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     return {
@@ -193,14 +188,14 @@ export class ExportService {
     });
 
     if (!writing) {
-      throw new NotFoundException('Không tìm thấy bài viết');
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     if (
       writing.userId !== userId &&
       writing.status !== WritingStatusEnum.PUBLIC
     ) {
-      throw new ForbiddenException('Bạn không có quyền xuất bài viết này');
+      throwAppError(ERROR_CODE.EXPORT_ACCESS_DENIED);
     }
 
     return writing;

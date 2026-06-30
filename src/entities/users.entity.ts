@@ -9,7 +9,7 @@ import {
 import { Writing } from './writings.entity';
 import { Analytics } from './analysis.entity';
 import { UserTokenUsage } from './user-token-usage.entity';
-import { Role } from 'src/common/enums/role.enum';
+import { Role } from 'src/types/auth.type';
 
 @Entity({ name: 'users', schema: 'public' })
 export class User {

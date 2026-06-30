@@ -1,4 +1,4 @@
-import type { JsonRecord } from 'src/types';
+import type { JsonRecord } from './json.type';
 
 export enum WritingType {
   SOCIAL_ESSAY = 'BÀI LUẬN XÃ HỘI',

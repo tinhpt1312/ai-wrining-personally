@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
+import { ERROR_CODE, ERROR_MESSAGES } from 'src/constants';
 import { ENV } from 'src/config/env.config';
-import { AiError, AiErrorCode } from '../utils/ai-error-handler';
-import { parseSuggestionsPayload } from 'src/shared';
+import { AiError, AiErrorCode } from '../../../utils/ai-error-handler';
+import { parseSuggestionsPayload } from 'src/utils/parse-json.helper';
 import type {
   AiProviderRequest,
   AiProviderResponse,
@@ -10,7 +11,7 @@ import type {
 import {
   isRawWritingSuggestion,
   type RawWritingSuggestion,
-} from '../types/suggestion.types';
+} from '../../../types/suggestion.types';
 
 export type { AiProviderRequest, AiProviderResponse };
 
@@ -218,8 +219,8 @@ Quy tắc:
 
     this.logger.error('Failed to generate suggestions:', lastError);
     throw new AiError(
-      'Không thể tạo gợi ý sửa bài',
       AiErrorCode.API_ERROR,
+      ERROR_MESSAGES[ERROR_CODE.AI_SUGGESTION_GENERATION_FAILED],
       true,
     );
   }
@@ -251,8 +252,8 @@ Quy tắc:
 
     if (!text?.trim()) {
       throw new AiError(
-        'Gemini không trả về nội dung',
         AiErrorCode.INVALID_RESPONSE,
+        ERROR_MESSAGES[ERROR_CODE.GEMINI_EMPTY_RESPONSE],
       );
     }
 
@@ -316,8 +317,8 @@ Quy tắc:
 
     if (rateLimit.isRateLimit) {
       return new AiError(
-        'Đã hết hạn mức Gemini free tier. Vui lòng đợi vài phút hoặc thử lại vào ngày mai.',
         AiErrorCode.RATE_LIMITED,
+        ERROR_MESSAGES[ERROR_CODE.GEMINI_RATE_LIMITED],
         true,
         Math.ceil(rateLimit.retryAfterSec ?? 60),
       );
@@ -325,8 +326,8 @@ Quy tắc:
 
     if (this.parseNotFound(error)) {
       return new AiError(
-        'Không tìm thấy model Gemini. Kiểm tra GEMINI_MODEL trong .env',
         AiErrorCode.API_ERROR,
+        ERROR_MESSAGES[ERROR_CODE.GEMINI_MODEL_NOT_FOUND],
         false,
       );
     }
@@ -338,16 +339,16 @@ Quy tắc:
       message.includes('API_KEY_INVALID')
     ) {
       return new AiError(
-        'Gemini API key không hợp lệ. Kiểm tra GEMINI_API_KEY trong .env',
         AiErrorCode.API_ERROR,
+        ERROR_MESSAGES[ERROR_CODE.GEMINI_API_KEY_INVALID],
         false,
       );
     }
 
     if (err?.status === 503 || message.includes('503')) {
       return new AiError(
-        'Gemini API tạm thời không khả dụng',
         AiErrorCode.SERVICE_UNAVAILABLE,
+        ERROR_MESSAGES[ERROR_CODE.GEMINI_SERVICE_UNAVAILABLE],
         true,
         30,
       );

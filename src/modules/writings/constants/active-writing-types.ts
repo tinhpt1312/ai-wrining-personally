@@ -1,3 +1,4 @@
+import { ERROR_CODE, ERROR_MESSAGES } from 'src/constants';
 import { WritingTypeEnum } from '../enum';
 
 /** Thể loại đang mở cho người dùng tạo bài mới */
@@ -13,7 +14,7 @@ export const ACTIVE_WRITING_TYPE_VALUES: ActiveWritingType[] = [
 ];
 
 export const ACTIVE_WRITING_TYPE_MESSAGE =
-  'Loại bài hiện chỉ hỗ trợ: BÀI LUẬN XÃ HỘI, BÀI LUẬN CÔNG GIÁO';
+  ERROR_MESSAGES[ERROR_CODE.WRITING_TYPE_NOT_SUPPORTED];
 
 export function isActiveWritingType(type: string): type is ActiveWritingType {
   return ACTIVE_WRITING_TYPE_VALUES.includes(type as ActiveWritingType);

@@ -1,4 +1,4 @@
-import { AiErrorDetails } from '../types/ai.types';
+import { AiErrorDetails } from '../types/ai.type';
 
 export enum AiErrorCode {
   INVALID_RESPONSE = 'INVALID_RESPONSE',

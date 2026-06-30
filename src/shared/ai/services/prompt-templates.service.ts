@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { WritingType } from '../types/ai.types';
+import { WritingType } from '../../../types/ai.type';
 import { Writing } from 'src/entities';
 
 @Injectable()

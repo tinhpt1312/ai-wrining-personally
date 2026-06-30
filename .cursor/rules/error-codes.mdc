@@ -1,0 +1,62 @@
+---
+description: API errors — English messages + ERROR_CODE constants, không hardcode
+globs: **/*.ts
+alwaysApply: false
+---
+
+# API Error Codes (ai-writing-personally)
+
+## Quy tắc
+
+- **Cấm** hardcode chuỗi lỗi trong service/guard/strategy (`throw new BadRequestException('...')`).
+- **Bắt buộc** dùng `ERROR_CODE` + `throwAppError()` từ `src/common/app.exception.ts`.
+- **Message API chỉ tiếng Anh** — nằm trong `src/constants/error-messages.constants.ts`, keyed by `ERROR_CODE`.
+- UI hiển thị tiếng Việt — map `errorCode` ở frontend (`ai-writing-ui`).
+
+## Cấu trúc
+
+```
+src/constants/
+  error-codes.constants.ts
+  error-messages.constants.ts
+  validation-messages.constants.ts
+src/types/                  # Role, JwtPayload, domain interfaces
+src/common/app.exception.ts
+```
+
+## Response shape
+
+```json
+{
+  "statusCode": 401,
+  "errorCode": "INVALID_CREDENTIALS",
+  "message": "Invalid username or password"
+}
+```
+
+## Ví dụ
+
+```typescript
+// ❌ BAD
+throw new UnauthorizedException('Mật khẩu không đúng');
+throw new BadRequestException('User ID is required');
+
+// ✅ GOOD
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
+
+throwAppError(ERROR_CODE.INVALID_CREDENTIALS);
+throwAppError(ERROR_CODE.USER_ID_REQUIRED);
+```
+
+## Thêm mã lỗi mới
+
+1. Thêm key vào `ERROR_CODE` trong `error-codes.constants.ts`.
+2. Thêm message tiếng Anh vào `ERROR_MESSAGES`.
+3. (Tuỳ chọn) Thêm HTTP status mặc định trong `app.exception.ts` → `DEFAULT_STATUS`.
+4. Map sang tiếng Việt ở `ai-writing-ui/src/messages/errors.ts`.
+
+## Ngoại lệ
+
+- **AI prompt / nội dung domain** (prompt templates, export labels cho user VN) — không áp dụng rule error API.
+- **Log nội bộ** — có thể dùng bất kỳ ngôn ngữ nào, không trả ra client.

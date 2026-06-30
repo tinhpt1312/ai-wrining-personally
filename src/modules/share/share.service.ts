@@ -1,10 +1,7 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
 import { Analytics, Writing } from 'src/entities';
 import { Repository } from 'typeorm';
 import { WritingStatusEnum } from '../writings/enum';
@@ -20,7 +17,7 @@ export class ShareService {
 
   async findPublicWriting(id: string) {
     if (!id) {
-      throw new BadRequestException('Writing ID is required');
+      throwAppError(ERROR_CODE.WRITING_ID_REQUIRED);
     }
 
     const writing = await this.writingRepository.findOne({
@@ -29,13 +26,11 @@ export class ShareService {
     });
 
     if (!writing) {
-      throw new NotFoundException(`Writing with ID ${id} not found`);
+      throwAppError(ERROR_CODE.WRITING_NOT_FOUND);
     }
 
     if (writing.status !== WritingStatusEnum.PUBLIC) {
-      throw new ForbiddenException(
-        'Bài viết chưa được đặt ở trạng thái công khai',
-      );
+      throwAppError(ERROR_CODE.WRITING_NOT_PUBLIC);
     }
 
     return {
@@ -55,7 +50,7 @@ export class ShareService {
 
   async findPublicAnalysis(id: string) {
     if (!id) {
-      throw new BadRequestException('Analytics ID is required');
+      throwAppError(ERROR_CODE.ANALYTICS_ID_REQUIRED);
     }
 
     const analysis = await this.analyticsRepository.findOne({
@@ -64,19 +59,17 @@ export class ShareService {
     });
 
     if (!analysis) {
-      throw new NotFoundException(`Analytics with ID ${id} not found`);
+      throwAppError(ERROR_CODE.ANALYTICS_NOT_FOUND);
     }
 
     const writing = analysis.writing;
 
     if (!writing) {
-      throw new NotFoundException('Không tìm thấy bài viết liên quan');
+      throwAppError(ERROR_CODE.RELATED_WRITING_NOT_FOUND);
     }
 
     if (writing.status !== WritingStatusEnum.PUBLIC) {
-      throw new ForbiddenException(
-        'Bài viết chưa được đặt ở trạng thái công khai',
-      );
+      throwAppError(ERROR_CODE.WRITING_NOT_PUBLIC);
     }
 
     return {

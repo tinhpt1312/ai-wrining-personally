@@ -6,7 +6,7 @@ import {
   IsBoolean,
   IsEnum,
 } from 'class-validator';
-import { WritingType } from 'src/modules/ai/types/ai.types';
+import { WritingType } from 'src/types/ai.type';
 import type { JsonRecord } from 'src/types';
 
 /**

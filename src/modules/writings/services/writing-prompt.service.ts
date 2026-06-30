@@ -1,12 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
-import { GeminiProvider } from 'src/modules/ai/providers/gemini.provider';
-import { PromptTemplatesService } from 'src/modules/ai/services/prompt-templates.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { ERROR_CODE } from 'src/constants';
+import { throwAppError } from 'src/common/app.exception';
+import { GeminiProvider } from 'src/shared/ai/providers/gemini.provider';
+import { PromptTemplatesService } from 'src/shared/ai/services/prompt-templates.service';
 import { TokenTrackerService } from 'src/modules/analytics/services/token-tracker.service';
-import { extractJson } from 'src/shared';
+import { extractJson } from 'src/utils/parse-json.helper';
 import {
   GenerateWritingPromptsDTO,
   PromptDifficulty,
@@ -34,7 +32,7 @@ export class WritingPromptService {
     dto: GenerateWritingPromptsDTO,
   ): Promise<GeneratedWritingPrompt[]> {
     if (!userId) {
-      throw new BadRequestException('User ID is required');
+      throwAppError(ERROR_CODE.USER_ID_REQUIRED);
     }
 
     const count = dto.count ?? 4;
@@ -114,9 +112,7 @@ export class WritingPromptService {
       return prompts;
     } catch (error) {
       this.logger.warn('Failed to parse writing prompts JSON', error);
-      throw new BadRequestException(
-        'Không thể sinh đề bài. Vui lòng thử lại sau.',
-      );
+      throwAppError(ERROR_CODE.PROMPT_GENERATION_FAILED);
     }
   }
 
