@@ -10,12 +10,36 @@ alwaysApply: false
 
 ```
 src/modules/{module}/
-  ...
-src/constants/           # ERROR_CODE, CORS, AI model (config tĩnh)
-src/types/               # enum, interface, type alias (domain + auth)
-src/utils/               # shared helpers
+  {module}.module.ts
+  {module}.controller.ts
+  {module}.service.ts          # service chính — một domain, một entry service
+  dto/
+  enum/                        # enum chỉ dùng trong module đó (hoặc src/types/ nếu dùng chéo)
+src/constants/                 # ERROR_CODE, CORS, AI model (config tĩnh)
+src/types/                     # enum, interface, type alias (domain + auth)
+src/utils/                     # helper dùng chéo module — KHÔNG đặt utils trong module
 src/common/
-  app.exception.ts       # AppException, throwAppError
+  app.exception.ts             # AppException, throwAppError
+```
+
+## Tách module (subdomain)
+
+- Mỗi module có **một service chính** (`books.service.ts`, `writings.service.ts`).
+- Subdomain lớn hoặc concern khác biệt → **module riêng**, không gom nhiều service không liên quan vào cùng module.
+
+| Module | Trách nhiệm |
+|--------|-------------|
+| `books` | Catalog sách: CRUD, gợi ý AI |
+| `book-chapters` | Đọc online: chương, tiến độ, ingest file |
+
+- Logic AI gắn catalog có thể là `{domain}-recommendation.service.ts` cùng module (vd. `book-recommendation.service.ts`).
+- **Cấm** tạo `modules/{module}/utils/` — mọi helper tái sử dụng đặt tại `src/utils/`.
+
+```typescript
+// ✅ src/utils/book-chapter-splitter.util.ts
+export function splitHtmlIntoChapters(html: string) { ... }
+
+// ❌ src/modules/books/utils/book-chapter-splitter.util.ts
 ```
 
 ## Trách nhiệm từng layer
@@ -29,9 +53,17 @@ src/common/
 
 ## Service theo module
 
-- Mỗi domain một `*.service.ts`: `AuthService`, `WritingsService`, `AiService`.
+- Mỗi domain một `*.service.ts` chính: `AuthService`, `WritingsService`, `BooksService`.
+- Subdomain tách module riêng (vd. `BookChaptersModule`) thay vì nhiều service lẻ trong một module.
 - Service **không** import service module khác trừ khi được inject qua module exports.
 - Shared logic → `src/utils/` hoặc `src/constants/`; exceptions → `src/common/app.exception.ts`.
+
+## Utils tập trung (`src/utils/`)
+
+- **Bắt buộc** đặt helper/hàm thuần (parse, split, format, estimate…) tại `src/utils/`.
+- Import: `from 'src/utils/...'` hoặc barrel `from 'src/utils'`.
+- **Cấm** `modules/{module}/utils/` — kể cả helper chỉ dùng trong một module hôm nay (dễ dùng chéo sau này).
+- Tên file: `{mục-đích}.util.ts` hoặc `{mục-đích}.helper.ts` theo convention hiện có.
 
 ## Constants tập trung
 

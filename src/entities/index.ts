@@ -5,3 +5,6 @@ export * from './ai.entity';
 export * from './user-token-usage.entity';
 export * from './writing-suggestion.entity';
 export * from './writing-revision.entity';
+export * from './books.entity';
+export * from './book-chapter.entity';
+export * from './user-book-progress.entity';

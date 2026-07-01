@@ -305,4 +305,68 @@ export class PromptTemplatesService {
   isTypeSupported(type: string): boolean {
     return Object.values(WritingType).includes(type as WritingType);
   }
+
+  /**
+   * Prompt for recommending books from catalog for essay writing
+   */
+  getBookRecommendationPrompt(params: {
+    writingType: string;
+    topic?: string;
+    draftExcerpt?: string;
+    count: number;
+    catalog: Array<{
+      id: string;
+      title: string;
+      author: string;
+      description?: string | null;
+      category: string;
+      tags: string[];
+      writingTypes: string[];
+      readingTimeMinutes?: number | null;
+    }>;
+  }): string {
+    const topicBlock = params.topic?.trim()
+      ? `\n**Chủ đề / đề bài:** ${params.topic.trim()}`
+      : '';
+
+    const draftBlock = params.draftExcerpt?.trim()
+      ? `\n**Trích đoạn bài đang viết:**\n${params.draftExcerpt.trim()}`
+      : '';
+
+    const catalogBlock = params.catalog
+      .map(
+        (book) =>
+          `- id: "${book.id}" | "${book.title}" — ${book.author} | thể loại: ${book.category} | tags: ${book.tags.join(', ')} | mô tả: ${book.description ?? 'Không có'}`,
+      )
+      .join('\n');
+
+    return `
+      Gợi ý ${params.count} cuốn sách từ danh mục bên dưới để hỗ trợ viết bài.
+
+      **Loại bài cần viết:** ${params.writingType}
+      ${topicBlock}
+      ${draftBlock}
+
+      **Danh mục sách (CHỈ được chọn từ danh sách này):**
+      ${catalogBlock}
+
+      Trả về CHỈ một JSON hợp lệ (không markdown):
+      {
+        "recommendations": [
+          {
+            "bookId": "<id chính xác từ danh mục>",
+            "reason": "<1-2 câu giải thích tại sao sách này phù hợp>",
+            "relevanceScore": <số 1-10>,
+            "suggestedEssayPrompt": "<đề bài viết cụ thể dựa trên sách này>"
+          }
+        ]
+      }
+
+      **Yêu cầu:**
+      - Đúng tối đa ${params.count} sách, ưu tiên phù hợp nhất với loại bài và chủ đề
+      - bookId phải khớp chính xác id trong danh mục — không bịa sách mới
+      - suggestedEssayPrompt là đề bài viết cụ thể, actionable (không viết sẵn bài)
+      - Toàn bộ bằng tiếng Việt
+    `;
+  }
 }

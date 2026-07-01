@@ -11,6 +11,8 @@ import { WritingSuggestionsModule } from './modules/writing-suggestions/writing-
 import { AdminModule } from './modules/admin/admin.module';
 import { ShareModule } from './modules/share/share.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { BooksModule } from './modules/books/books.module';
+import { BookChaptersModule } from './modules/book-chapters/book-chapters.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { DocumentsModule } from './modules/documents/documents.module';
     AdminModule,
     ShareModule,
     DocumentsModule,
+    BooksModule,
+    BookChaptersModule,
   ],
   controllers: [],
   providers: [],

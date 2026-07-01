@@ -13,9 +13,11 @@ NestJS API. Mọi code mới phải tuân thủ các nguyên tắc sau.
 
 ## Module boundaries
 
-- Mỗi feature/domain = một module độc lập (auth, writings, analysis, …).
+- Mỗi feature/domain = một module độc lập (auth, writings, books, book-chapters, …).
+- Subdomain lớn → module riêng; **không** nhồi nhiều service không cùng concern vào một module.
 - **Không** import chéo logic giữa module; dùng public API (export) hoặc shared layer.
 - Shared code: `src/constants/`, `src/utils/`, exceptions → `src/common/app.exception.ts`.
+- **Cấm** `modules/{module}/utils/` — utils luôn ở `src/utils/`.
 
 ## Constants tập trung
 

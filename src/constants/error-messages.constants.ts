@@ -58,6 +58,21 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODE.FILE_EMPTY_OR_CORRUPT]:
     'Could not read file content. The file may be empty or corrupted',
 
+  [ERROR_CODE.BOOK_NOT_FOUND]: 'Book not found',
+  [ERROR_CODE.BOOK_RECOMMENDATION_FAILED]:
+    'Failed to generate book recommendations. Please try again later',
+  [ERROR_CODE.BOOK_CATALOG_EMPTY]: 'No books available in the catalog',
+
+  [ERROR_CODE.CHAPTER_NOT_FOUND]: 'Chapter not found',
+  [ERROR_CODE.BOOK_NO_CHAPTERS]: 'This book has no readable chapters yet',
+  [ERROR_CODE.BOOK_INGEST_FAILED]: 'Failed to import book content. Please try again',
+  [ERROR_CODE.UNSUPPORTED_BOOK_FORMAT]:
+    'Unsupported book file format. Use .docx, .epub, or .pdf',
+  [ERROR_CODE.BOOK_FILE_TOO_LARGE]: 'Book file is too large. Maximum size is 15MB',
+  [ERROR_CODE.BOOK_ACCESS_DENIED]: 'You do not have permission to access this book',
+  [ERROR_CODE.BOOK_NOT_PENDING]: 'This book is not awaiting approval',
+  [ERROR_CODE.BOOK_ALREADY_REVIEWED]: 'This book has already been reviewed',
+
   [ERROR_CODE.EXPORT_ACCESS_DENIED]: 'You do not have permission to export this writing',
 
   [ERROR_CODE.AI_SUGGESTION_GENERATION_FAILED]: 'Failed to generate writing suggestions',
