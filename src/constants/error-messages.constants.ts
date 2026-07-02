@@ -73,6 +73,11 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODE.BOOK_NOT_PENDING]: 'This book is not awaiting approval',
   [ERROR_CODE.BOOK_ALREADY_REVIEWED]: 'This book has already been reviewed',
 
+  [ERROR_CODE.CANNOT_MODIFY_OWN_ADMIN_ACCOUNT]:
+    'You cannot change your own role or deactivate your own account',
+  [ERROR_CODE.LAST_ADMIN_REQUIRED]:
+    'At least one active admin account must remain in the system',
+
   [ERROR_CODE.EXPORT_ACCESS_DENIED]: 'You do not have permission to export this writing',
 
   [ERROR_CODE.AI_SUGGESTION_GENERATION_FAILED]: 'Failed to generate writing suggestions',
